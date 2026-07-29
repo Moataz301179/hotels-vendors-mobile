@@ -125,3 +125,17 @@ export const aiAPI = {
   ask: (message: string, role: string) =>
     api.post("/ai/assistant", { message, role }),
 };
+
+// ─── Oliv Finance (Supplier Factoring) ──────────────
+export const olivAPI = {
+  onboardSupplier: (data: Record<string, unknown>) =>
+    api.post("/oliv/onboard-supplier", data),
+  initiateFactoring: (data: Record<string, unknown>) =>
+    api.post("/oliv/initiate-factoring", data),
+};
+
+// ─── Fintech (Credit Facility) ──────────────────────
+export const fintechAPI = {
+  getCreditFacility: () => api.get("/fintech/oliv-facility"),
+  getFactoringHistory: () => api.get("/fintech/factoring-history"),
+};

@@ -25,8 +25,13 @@ import InvoicesScreen from "@/screens/hotel/InvoicesScreen";
 // Supplier screens
 import SupplierDashboardScreen from "@/screens/supplier/SupplierDashboardScreen";
 import SupplierOrdersScreen from "@/screens/supplier/SupplierOrdersScreen";
+import OlivActivationScreen from "@/screens/supplier/OlivActivationScreen";
+import InvoiceUploadScreen from "@/screens/supplier/InvoiceUploadScreen";
+import CreditFacilityScreen from "@/screens/supplier/CreditFacilityScreen";
+import FactoringHistoryScreen from "@/screens/supplier/FactoringHistoryScreen";
 
 const Stack = createNativeStackNavigator();
+const FinanceStackNav = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const screenOptions = {
@@ -34,6 +39,12 @@ const screenOptions = {
   headerTintColor: colors.text,
   headerTitleStyle: { fontWeight: "600" as const },
   contentStyle: { backgroundColor: colors.bg },
+};
+
+const stackScreenOptions = {
+  headerStyle: { backgroundColor: colors.bg },
+  headerTintColor: colors.text,
+  headerTitleStyle: { fontWeight: "600" as const },
 };
 
 function HotelTabs() {
@@ -57,6 +68,17 @@ function HotelTabs() {
   );
 }
 
+function FinanceStack() {
+  return (
+    <FinanceStackNav.Navigator screenOptions={stackScreenOptions}>
+      <FinanceStackNav.Screen name="OlivActivation" component={OlivActivationScreen} options={{ title: "Oliv Financing" }} />
+      <FinanceStackNav.Screen name="InvoiceUpload" component={InvoiceUploadScreen} options={{ title: "Upload Invoice" }} />
+      <FinanceStackNav.Screen name="CreditFacility" component={CreditFacilityScreen} options={{ title: "Credit Facility" }} />
+      <FinanceStackNav.Screen name="FactoringHistory" component={FactoringHistoryScreen} options={{ title: "Factoring History" }} />
+    </FinanceStackNav.Navigator>
+  );
+}
+
 function SupplierTabs() {
   return (
     <Tab.Navigator
@@ -71,6 +93,8 @@ function SupplierTabs() {
     >
       <Tab.Screen name="Dashboard" component={SupplierDashboardScreen} options={{ title: "Supplier Central" }} />
       <Tab.Screen name="Orders" component={SupplierOrdersScreen} options={{ title: "Orders" }} />
+      <Tab.Screen name="Finance" component={FinanceStack} options={{ title: "Finance", tabBarLabel: "Finance" }} />
+      <Tab.Screen name="Invoices" component={InvoiceUploadScreen} options={{ title: "Invoices", tabBarLabel: "Invoices" }} />
     </Tab.Navigator>
   );
 }
