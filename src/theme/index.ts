@@ -1,14 +1,15 @@
 /**
- * Invo Mobile — Design Tokens (Variant A: dark institutional glassmorphism)
+ * Invo Mobile — Design Tokens (Variant A: dark institutional)
  * Approved 2026-08-04 (docs/planning/UI_DESIGN_TOKENS_UNIFIED.md)
- * Base: dark grey #0B0D12 + text #F2F4F8. Single restrained accent #4F6BFF (≤5% of UI).
+ * Strictly black / grey / white. No brand accent color, no neon.
+ * Hierarchy carried by type scale + white/surface contrast only.
  */
 
 export const colors = {
-  // Brand
-  primary: "#4F6BFF",
-  primaryDark: "#3D5BE0",
-  primaryMuted: "rgba(79,107,255,0.12)",
+  // Brand (monochrome)
+  primary: "#FFFFFF",
+  primaryDark: "#D8DCE3",
+  primaryMuted: "rgba(255,255,255,0.10)",
 
   // Background layers
   bg: "#0B0D12",
@@ -23,20 +24,20 @@ export const colors = {
 
   // Text
   text: "#F2F4F8",
-  textSecondary: "rgba(242,244,248,0.6)",
-  textMuted: "rgba(242,244,248,0.4)",
+  textSecondary: "rgba(242,244,248,0.72)",
+  textMuted: "rgba(242,244,248,0.48)",
 
-  // Status
+  // Status (semantic only, never brand)
   success: "#22C55E",
   warning: "#F59E0B",
   error: "#EF4444",
-  info: "#4F6BFF",
+  info: "#F2F4F8",
 
   // Semantic
   approved: "#22C55E",
   pending: "#F59E0B",
   rejected: "#EF4444",
-  disbursed: "#A855F7",
+  disbursed: "#E2E4E9",
 
   // Tab bar
   tabBg: "rgba(11,13,18,0.9)",
@@ -62,11 +63,11 @@ export const radii = {
 } as const;
 
 export const typography = {
-  h1: { fontSize: 28, fontWeight: "700" as const, letterSpacing: -0.5 },
-  h2: { fontSize: 22, fontWeight: "700" as const, letterSpacing: -0.3 },
-  h3: { fontSize: 18, fontWeight: "600" as const },
-  body: { fontSize: 15, fontWeight: "400" as const, lineHeight: 22 },
-  bodySmall: { fontSize: 13, fontWeight: "400" as const, lineHeight: 18 },
-  label: { fontSize: 12, fontWeight: "600" as const, letterSpacing: 0.5 },
-  caption: { fontSize: 11, fontWeight: "400" as const },
+  h1: { fontSize: 28, fontWeight: "700" as const, letterSpacing: -0.5, fontFamily: "PlusJakartaSans_700Bold" },
+  h2: { fontSize: 22, fontWeight: "700" as const, letterSpacing: -0.3, fontFamily: "PlusJakartaSans_700Bold" },
+  h3: { fontSize: 18, fontWeight: "600" as const, fontFamily: "PlusJakartaSans_600SemiBold" },
+  body: { fontSize: 15, fontWeight: "400" as const, lineHeight: 22, fontFamily: "PlusJakartaSans_400Regular" },
+  bodySmall: { fontSize: 13, fontWeight: "400" as const, lineHeight: 18, fontFamily: "PlusJakartaSans_400Regular" },
+  label: { fontSize: 12, fontWeight: "600" as const, letterSpacing: 0.5, fontFamily: "PlusJakartaSans_600SemiBold" },
+  caption: { fontSize: 11, fontWeight: "400" as const, fontFamily: "PlusJakartaSans_400Regular" },
 } as const;

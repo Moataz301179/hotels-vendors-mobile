@@ -91,7 +91,7 @@ function SupplierTabs() {
         headerTitleStyle: { fontWeight: "600" as const },
       }}
     >
-      <Tab.Screen name="Dashboard" component={SupplierDashboardScreen} options={{ title: "Supplier Central" }} />
+      <Tab.Screen name="Dashboard" component={SupplierDashboardScreen} options={{ title: "Vendor Central" }} />
       <Tab.Screen name="Orders" component={SupplierOrdersScreen} options={{ title: "Orders" }} />
       <Tab.Screen name="Finance" component={FinanceStack} options={{ title: "Finance", tabBarLabel: "Finance" }} />
       <Tab.Screen name="Invoices" component={InvoiceUploadScreen} options={{ title: "Invoices", tabBarLabel: "Invoices" }} />

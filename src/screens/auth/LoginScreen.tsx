@@ -68,6 +68,8 @@ export default function LoginScreen({ navigation }: any) {
             <Text style={styles.link}>Don't have an account? Sign Up</Text>
           </TouchableOpacity>
         </View>
+
+        <Text style={styles.trust}>Secure sign-in · ETA-compliant invoicing</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -99,4 +101,5 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: colors.bg, fontWeight: "700", fontSize: 16 },
   link: { color: colors.primary, textAlign: "center", marginTop: spacing.lg, ...typography.bodySmall },
+  trust: { ...typography.caption, color: colors.textMuted, textAlign: "center", marginTop: spacing.xxl },
 });

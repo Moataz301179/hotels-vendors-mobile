@@ -12,7 +12,7 @@ import type { UserRole } from "@/types";
 
 const ROLES: { value: UserRole; label: string; desc: string }[] = [
   { value: "HOTEL", label: "Hotel Buyer", desc: "Browse & order supplies" },
-  { value: "SUPPLIER", label: "Supplier", desc: "Sell products to hotels" },
+  { value: "SUPPLIER", label: "Vendor", desc: "Sell products to hotels" },
 ];
 
 export default function RegisterScreen({ navigation }: any) {
@@ -39,6 +39,7 @@ export default function RegisterScreen({ navigation }: any) {
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Create Account</Text>
 
+        <Text style={styles.roleTitle}>I'm joining as</Text>
         <View style={styles.roleRow}>
           {ROLES.map((r) => (
             <TouchableOpacity
@@ -79,6 +80,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flexGrow: 1, padding: spacing.xl, paddingTop: 60 },
   title: { ...typography.h1, color: colors.text, marginBottom: spacing.xl },
+  roleTitle: { ...typography.label, color: colors.textSecondary, marginBottom: spacing.sm },
   roleRow: { flexDirection: "row", gap: spacing.md, marginBottom: spacing.xl },
   roleCard: {
     flex: 1, padding: spacing.lg, borderRadius: radii.lg,
