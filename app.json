@@ -1,17 +1,20 @@
 {
   "expo": {
-    "name": "hotels-vendors-mobile",
-    "slug": "hotels-vendors-mobile",
+    "name": "Invo",
+    "slug": "invo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "scheme": "invo",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hotelsvendors.invo"
     },
     "android": {
+      "package": "com.hotelsvendors.invo",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0B0D12",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

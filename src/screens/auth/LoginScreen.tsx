@@ -30,7 +30,7 @@ export default function LoginScreen({ navigation }: any) {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.logo}>HotelsVendors</Text>
+          <Text style={styles.logo}>Invo</Text>
           <Text style={styles.tagline}>Digital Procurement Hub</Text>
         </View>
 

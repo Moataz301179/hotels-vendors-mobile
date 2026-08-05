@@ -1,35 +1,36 @@
 /**
- * HotelsVendors Mobile — Design Tokens
- * Dark Mode Glassmorphism (matches web dashboard)
+ * Invo Mobile — Design Tokens (Variant A: dark institutional glassmorphism)
+ * Approved 2026-08-04 (docs/planning/UI_DESIGN_TOKENS_UNIFIED.md)
+ * Base: dark grey #0B0D12 + text #F2F4F8. Single restrained accent #4F6BFF (≤5% of UI).
  */
 
 export const colors = {
   // Brand
-  primary: "#39FF7E",
-  primaryDark: "#2BD668",
-  primaryMuted: "rgba(57,255,126,0.12)",
+  primary: "#4F6BFF",
+  primaryDark: "#3D5BE0",
+  primaryMuted: "rgba(79,107,255,0.12)",
 
   // Background layers
-  bg: "#07090F",
+  bg: "#0B0D12",
   bgCard: "rgba(255,255,255,0.04)",
   bgCardHover: "rgba(255,255,255,0.08)",
   bgInput: "rgba(255,255,255,0.06)",
-  bgModal: "rgba(7,9,15,0.95)",
+  bgModal: "rgba(11,13,18,0.95)",
 
   // Borders
   border: "rgba(255,255,255,0.08)",
   borderLight: "rgba(255,255,255,0.12)",
 
   // Text
-  text: "#FFFFFF",
-  textSecondary: "rgba(255,255,255,0.6)",
-  textMuted: "rgba(255,255,255,0.4)",
+  text: "#F2F4F8",
+  textSecondary: "rgba(242,244,248,0.6)",
+  textMuted: "rgba(242,244,248,0.4)",
 
   // Status
   success: "#22C55E",
   warning: "#F59E0B",
   error: "#EF4444",
-  info: "#3B82F6",
+  info: "#4F6BFF",
 
   // Semantic
   approved: "#22C55E",
@@ -38,7 +39,7 @@ export const colors = {
   disbursed: "#A855F7",
 
   // Tab bar
-  tabBg: "rgba(7,9,15,0.9)",
+  tabBg: "rgba(11,13,18,0.9)",
   tabBorder: "rgba(255,255,255,0.06)",
 } as const;
 
