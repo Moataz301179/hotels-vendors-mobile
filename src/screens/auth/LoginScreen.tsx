@@ -4,7 +4,7 @@
 
 import React, { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image,
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
@@ -28,6 +28,8 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <Image source={require("../../../assets/images/auth-bg.jpg")} style={styles.bgImage} resizeMode="cover" />
+      <View style={styles.bgOverlay} />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Text style={styles.logo}>Invo</Text>
@@ -77,6 +79,8 @@ export default function LoginScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  bgImage: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
+  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(11,13,18,0.88)" },
   scroll: { flexGrow: 1, justifyContent: "center", padding: spacing.xl },
   header: { alignItems: "center", marginBottom: spacing.xxxl },
   logo: { ...typography.h1, color: colors.primary, fontSize: 32 },
