@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "hotelsvendors.com",
     "name": "Invo",
     "slug": "invo",
     "version": "1.0.0",
@@ -23,6 +24,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "515fa26b-e2f5-4036-9d25-800081b76af9"
+      }
     }
   }
 }
