@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   logoutText: { color: colors.error, ...typography.label },
   statsRow: { flexDirection: "row", gap: spacing.md, marginBottom: spacing.xxl },
   statCard: { flex: 1, backgroundColor: colors.bgCard, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, alignItems: "center" },
-  statValue: { ...typography.h2, fontWeight: "700" },
+  statValue: { ...typography.h2, fontWeight: "600" },
   statLabel: { ...typography.caption, color: colors.textMuted, marginTop: spacing.xs, textAlign: "center" },
   sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
   actionCard: { flexDirection: "row", alignItems: "center", backgroundColor: colors.bgCard, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, marginBottom: spacing.md },

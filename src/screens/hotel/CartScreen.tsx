@@ -94,6 +94,6 @@ const styles = StyleSheet.create({
   totalLabel: { ...typography.h3, color: colors.textSecondary },
   totalValue: { ...typography.h2, color: colors.primary },
   checkoutBtn: { backgroundColor: colors.primary, borderRadius: radii.md, padding: spacing.lg, alignItems: "center" },
-  checkoutBtnText: { color: colors.bg, fontWeight: "700", fontSize: 16 },
+  checkoutBtnText: { color: colors.bg, fontWeight: "600", fontSize: 16 },
   empty: { ...typography.body, color: colors.textMuted, textAlign: "center", marginTop: spacing.xxxl * 3 },
 });

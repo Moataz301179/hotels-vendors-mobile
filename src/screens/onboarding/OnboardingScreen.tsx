@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   image: { width: SCREEN_W, height: "100%", position: "absolute" },
   overlay: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: "rgba(11,13,18,0.55)",
+    backgroundColor: "rgba(10,14,26,0.55)",
   },
   textBlock: { flex: 1, justifyContent: "flex-end", padding: spacing.xl, paddingBottom: spacing.xxxl },
   kicker: { ...typography.label, color: "#FFFFFF", letterSpacing: 2, textTransform: "uppercase", marginBottom: spacing.sm },
@@ -164,5 +164,5 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     alignItems: "center",
   },
-  ctaText: { color: colors.bg, fontWeight: "700", fontSize: 16, fontFamily: "PlusJakartaSans_700Bold" },
+  ctaText: { color: colors.bg, fontWeight: "600", fontSize: 16, fontFamily: "PlusJakartaSans_600SemiBold" },
 });

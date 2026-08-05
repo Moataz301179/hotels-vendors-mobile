@@ -117,6 +117,6 @@ const styles = StyleSheet.create({
   cardPrice: { ...typography.body, color: colors.primary, fontWeight: "600", marginTop: spacing.sm },
   cardSupplier: { ...typography.bodySmall, color: colors.textSecondary, marginTop: 2 },
   addButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },
-  addButtonText: { color: colors.bg, fontSize: 22, fontWeight: "700" },
+  addButtonText: { color: colors.bg, fontSize: 22, fontWeight: "600" },
   empty: { ...typography.body, color: colors.textMuted, textAlign: "center", marginTop: spacing.xxxl * 2 },
 });

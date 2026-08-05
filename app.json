@@ -1,7 +1,7 @@
 {
   "expo": {
     "owner": "hotelsvendors.com",
-    "name": "Invo",
+    "name": "INVO",
     "slug": "invo",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,7 +15,7 @@
     "android": {
       "package": "com.hotelsvendors.invo",
       "adaptiveIcon": {
-        "backgroundColor": "#0B0D12",
+        "backgroundColor": "#0A0E1A",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

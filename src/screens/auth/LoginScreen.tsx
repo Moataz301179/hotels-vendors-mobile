@@ -32,8 +32,9 @@ export default function LoginScreen({ navigation }: any) {
       <View style={styles.bgOverlay} />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.logo}>Invo</Text>
+          <Text style={styles.logo}>INVO</Text>
           <Text style={styles.tagline}>Digital Procurement Hub</Text>
+          <Text style={styles.byline}>A Hotels Vendors application</Text>
         </View>
 
         <View style={styles.form}>
@@ -80,11 +81,12 @@ export default function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   bgImage: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
-  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(11,13,18,0.88)" },
+  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(10,14,26,0.88)" },
   scroll: { flexGrow: 1, justifyContent: "center", padding: spacing.xl },
   header: { alignItems: "center", marginBottom: spacing.xxxl },
-  logo: { ...typography.h1, color: colors.primary, fontSize: 32 },
+  logo: { ...typography.h1, color: colors.primary, fontSize: 32, letterSpacing: 6 },
   tagline: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
+  byline: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, letterSpacing: 0.4 },
   form: { gap: spacing.md },
   label: { ...typography.label, color: colors.textSecondary, marginBottom: spacing.xs },
   input: {
@@ -103,7 +105,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: spacing.md,
   },
-  buttonText: { color: colors.bg, fontWeight: "700", fontSize: 16 },
+  buttonText: { color: colors.bg, fontWeight: "600", fontSize: 16 },
   link: { color: colors.primary, textAlign: "center", marginTop: spacing.lg, ...typography.bodySmall },
   trust: { ...typography.caption, color: colors.textMuted, textAlign: "center", marginTop: spacing.xxl },
 });

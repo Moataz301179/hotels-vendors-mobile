@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xxxl * 2 },
   brandRow: { alignItems: "center", marginTop: spacing.xl },
-  logo: { fontSize: 36, fontWeight: "800", color: colors.primary, letterSpacing: -1 },
+  logo: { fontSize: 36, fontWeight: "600", color: colors.primary, letterSpacing: -1 },
   poweredBy: { ...typography.caption, color: colors.textMuted, marginTop: spacing.xs },
   headline: { ...typography.h1, color: colors.text, textAlign: "center", marginTop: spacing.lg },
   subtext: { ...typography.body, color: colors.textSecondary, textAlign: "center", lineHeight: 22 },
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   checkboxActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  checkmark: { fontSize: 14, fontWeight: "700", color: colors.bg },
+  checkmark: { fontSize: 14, fontWeight: "600", color: colors.bg },
   checkLabel: { flex: 1, ...typography.bodySmall, color: colors.text, lineHeight: 20 },
   activateBtn: {
     backgroundColor: colors.primary,
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   activateBtnDisabled: { opacity: 0.4 },
-  activateBtnText: { ...typography.h3, color: colors.bg, fontWeight: "700" },
+  activateBtnText: { ...typography.h3, color: colors.bg, fontWeight: "600" },
   doneIconWrap: {
     width: 80,
     height: 80,
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: spacing.xxxl,
   },
-  doneIcon: { fontSize: 40, color: colors.primary, fontWeight: "700" },
+  doneIcon: { fontSize: 40, color: colors.primary, fontWeight: "600" },
   refCard: {
     backgroundColor: colors.bgCard,
     borderRadius: radii.lg,
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   refLabel: { ...typography.caption, color: colors.textMuted, textTransform: "uppercase" },
-  refValue: { ...typography.body, color: colors.primary, fontWeight: "700" },
+  refValue: { ...typography.body, color: colors.primary, fontWeight: "600" },
   noteCard: {
     backgroundColor: colors.bgCard,
     borderRadius: radii.lg,

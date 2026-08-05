@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   list: { padding: spacing.lg, gap: spacing.md },
   statsRow: { flexDirection: "row", gap: spacing.md, marginBottom: spacing.sm },
   statCard: { flex: 1, backgroundColor: colors.bgCard, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, alignItems: "center" },
-  statValue: { ...typography.h2, fontWeight: "700" },
+  statValue: { ...typography.h2, fontWeight: "600" },
   statLabel: { ...typography.caption, color: colors.textMuted, marginTop: spacing.xs },
   card: { backgroundColor: colors.bgCard, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },

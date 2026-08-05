@@ -81,7 +81,7 @@ export default function RegisterScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   bgImage: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
-  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(11,13,18,0.88)" },
+  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(10,14,26,0.88)" },
   scroll: { flexGrow: 1, padding: spacing.xl, paddingTop: 60 },
   title: { ...typography.h1, color: colors.text, marginBottom: spacing.xl },
   roleTitle: { ...typography.label, color: colors.textSecondary, marginBottom: spacing.sm },
@@ -99,6 +99,6 @@ const styles = StyleSheet.create({
   label: { ...typography.label, color: colors.textSecondary, marginBottom: spacing.xs },
   input: { backgroundColor: colors.bgInput, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md, padding: spacing.lg, color: colors.text, fontSize: 15 },
   button: { backgroundColor: colors.primary, borderRadius: radii.md, padding: spacing.lg, alignItems: "center", marginTop: spacing.md },
-  buttonText: { color: colors.bg, fontWeight: "700", fontSize: 16 },
+  buttonText: { color: colors.bg, fontWeight: "600", fontSize: 16 },
   link: { color: colors.primary, textAlign: "center", marginTop: spacing.lg, ...typography.bodySmall },
 });

@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   submitBtnDisabled: { opacity: 0.4 },
-  submitBtnText: { ...typography.h3, color: colors.bg, fontWeight: "700" },
+  submitBtnText: { ...typography.h3, color: colors.bg, fontWeight: "600" },
   cancelBtn: { alignItems: "center", paddingVertical: spacing.md },
   cancelBtnText: { ...typography.bodySmall, color: colors.textMuted },
 });

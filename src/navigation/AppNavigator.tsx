@@ -59,7 +59,7 @@ function HotelTabs() {
         headerTitleStyle: { fontWeight: "600" as const },
       }}
     >
-      <Tab.Screen name="Home" component={HotelHomeScreen} options={{ title: "Invo", tabBarLabel: "Home" }} />
+      <Tab.Screen name="Home" component={HotelHomeScreen} options={{ title: "INVO", tabBarLabel: "Home" }} />
       <Tab.Screen name="CatalogTab" component={CatalogScreen} options={{ title: "Catalog", tabBarLabel: "Catalog" }} />
       <Tab.Screen name="CartTab" component={CartScreen} options={{ title: "Cart", tabBarLabel: "Cart" }} />
       <Tab.Screen name="OrdersTab" component={OrdersScreen} options={{ title: "Orders", tabBarLabel: "Orders" }} />

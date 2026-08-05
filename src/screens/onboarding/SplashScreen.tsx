@@ -72,8 +72,9 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         <Text style={styles.mono}>I</Text>
       </Animated.View>
 
-      <Text style={styles.wordmark}>Invo</Text>
+      <Text style={styles.wordmark}>INVO</Text>
       <Text style={styles.subline}>Digital Procurement Hub</Text>
+      <Text style={styles.byline}>A Hotels Vendors application</Text>
 
       <View style={styles.stepRow}>
         <Text style={styles.step}>{INIT_STEPS[step]}</Text>
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
     width: 320,
     height: 320,
     borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(212,175,55,0.10)",
     top: "28%",
   },
   card: {
@@ -109,15 +110,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#FFFFFF",
-    shadowOpacity: 0.25,
+    borderWidth: 1,
+    borderColor: "rgba(212,175,55,0.55)",
+    shadowColor: "#D4AF37",
+    shadowOpacity: 0.35,
     shadowRadius: 28,
     shadowOffset: { width: 0, height: 0 },
     elevation: 12,
   },
-  mono: { ...typography.h1, color: "#0B0D12", fontSize: 52, fontFamily: "PlusJakartaSans_700Bold" },
-  wordmark: { ...typography.h1, color: colors.text, marginTop: spacing.xxl },
+  mono: { ...typography.h1, color: "#0A0E1A", fontSize: 52, fontFamily: "PlusJakartaSans_600SemiBold" },
+  wordmark: { ...typography.h1, color: colors.text, marginTop: spacing.xxl, letterSpacing: 6 },
   subline: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
+  byline: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, letterSpacing: 0.4 },
   stepRow: {
     width: "100%",
     flexDirection: "row",
@@ -137,6 +141,6 @@ const styles = StyleSheet.create({
   barFill: {
     height: 4,
     borderRadius: radii.full,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.primary,
   },
 });
