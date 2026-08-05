@@ -24,6 +24,8 @@ import {
 import { olivAPI } from "@/api";
 import { useAuthStore } from "@/store/auth";
 import { colors, spacing, radii, typography } from "@/theme";
+import { openOlivOnboarding } from "@/utils/olivLink";
+import { isValidEgyptianPhone, normalizePhone } from "@/utils/phone";
 
 const BENEFITS = [
   { title: "Same Day Approval", icon: "⚡", desc: "Get credit decision within hours of application" },
@@ -38,6 +40,8 @@ export default function OlivActivationScreen() {
   const [step, setStep] = useState<Step>("intro");
   const [loading, setLoading] = useState(false);
   const [onboardingId, setOnboardingId] = useState<string | null>(null);
+  const [olivPhone, setOlivPhone] = useState(user?.phone || "");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   // Step 1 — Company
   const [company, setCompany] = useState({
@@ -168,6 +172,31 @@ export default function OlivActivationScreen() {
     }
   };
 
+  const handleContinueOnOliv = async () => {
+    const normalized = normalizePhone(olivPhone);
+    if (!isValidEgyptianPhone(normalized)) {
+      setPhoneError("Enter a valid Egyptian mobile number, e.g. 0101 234 5678");
+      return;
+    }
+    setPhoneError(null);
+    try {
+      await openOlivOnboarding({
+        phone: normalized,
+        name: user?.name || undefined,
+        email: user?.email || undefined,
+      });
+      Alert.alert(
+        "Opening Oliv",
+        "Referral code CHV000 and your mobile number were copied to the clipboard — paste them into the Oliv form if they don't auto-fill."
+      );
+    } catch {
+      Alert.alert(
+        "Could not open Oliv",
+        "Referral code CHV000 and your number are on your clipboard. Open oliv.finance and paste them in the referral field."
+      );
+    }
+  };
+
   const Field = ({
     label,
     value,
@@ -251,16 +280,41 @@ export default function OlivActivationScreen() {
           ))}
         </View>
 
-        <Text style={styles.subtext}>
-          Apply right here in the app — 3 short steps, about 3 minutes.
-        </Text>
+        <View style={styles.phoneBlock}>
+          <Text style={styles.fieldLabel}>
+            Mobile number Oliv will pre-fill <Text style={styles.req}>*</Text>
+          </Text>
+          <TextInput
+            style={styles.input}
+            value={olivPhone}
+            onChangeText={(t) => {
+              setOlivPhone(t.replace(/[^\d+]/g, "").slice(0, 15));
+              setPhoneError(null);
+            }}
+            placeholder="+20 10X XXX XXXX"
+            placeholderTextColor={colors.textMuted}
+            keyboardType="phone-pad"
+          />
+          {phoneError && <Text style={styles.err}>{phoneError}</Text>}
+          <Text style={styles.helper}>
+            Your referral code CHV000 is included automatically.
+          </Text>
+        </View>
 
         <TouchableOpacity
           style={styles.activateBtn}
+          onPress={handleContinueOnOliv}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.activateBtnText}>Get the Oliv App</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.inAppLink}
           onPress={() => setStep("company")}
           activeOpacity={0.8}
         >
-          <Text style={styles.activateBtnText}>Start Application</Text>
+          <Text style={styles.inAppLinkText}>Or apply in-app with 3 short steps</Text>
         </TouchableOpacity>
       </ScrollView>
     );
@@ -466,6 +520,11 @@ const styles = StyleSheet.create({
   field: { gap: spacing.xs },
   fieldLabel: { ...typography.bodySmall, color: colors.textSecondary, fontWeight: "600" },
   req: { color: colors.error },
+  phoneBlock: { gap: spacing.xs, marginTop: spacing.sm },
+  err: { ...typography.caption, color: colors.error },
+  helper: { ...typography.caption, color: colors.textMuted },
+  inAppLink: { alignItems: "center", paddingVertical: spacing.md },
+  inAppLinkText: { ...typography.bodySmall, color: colors.textSecondary, textDecorationLine: "underline" },
   input: {
     backgroundColor: colors.bgCard,
     borderWidth: 1,

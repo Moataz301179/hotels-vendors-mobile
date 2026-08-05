@@ -9,6 +9,7 @@ import {
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
 import type { UserRole } from "@/types";
+import { isValidEgyptianPhone, normalizePhone } from "@/utils/phone";
 
 const ROLES: { value: UserRole; label: string; desc: string }[] = [
   { value: "HOTEL", label: "Hotel Buyer", desc: "Browse & order supplies" },
@@ -18,20 +19,32 @@ const ROLES: { value: UserRole; label: string; desc: string }[] = [
 export default function RegisterScreen({ navigation }: any) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("HOTEL");
-  const { register, isLoading } = useAuthStore();
+  const { isLoading } = useAuthStore();
 
-  const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert("Error", "All fields are required");
+  const handleSendCode = () => {
+    if (!name || !password) {
+      Alert.alert("Error", "Full name and password are required");
       return;
     }
-    try {
-      await register({ name, email, password, role });
-    } catch (err: any) {
-      Alert.alert("Registration Failed", err.message);
+    if (password.length < 8) {
+      Alert.alert("Error", "Password must be at least 8 characters");
+      return;
     }
+    if (!isValidEgyptianPhone(phone)) {
+      Alert.alert("Invalid Number", "Enter a valid Egyptian mobile number, e.g. 0101 234 5678");
+      return;
+    }
+    navigation.navigate("Otp", {
+      mode: "register",
+      phone: normalizePhone(phone),
+      name,
+      email: email.trim() || undefined,
+      password,
+      role,
+    });
   };
 
   return (
@@ -59,14 +72,24 @@ export default function RegisterScreen({ navigation }: any) {
           <Text style={styles.label}>Full Name</Text>
           <TextInput style={styles.input} value={name} onChangeText={setName} placeholderTextColor={colors.textMuted} placeholder="John Doe" />
 
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Mobile Number</Text>
+          <TextInput
+            style={styles.input}
+            value={phone}
+            onChangeText={(t) => setPhone(t.replace(/[^\d+]/g, "").slice(0, 15))}
+            placeholderTextColor={colors.textMuted}
+            placeholder="+20 10X XXX XXXX"
+            keyboardType="phone-pad"
+          />
+
+          <Text style={styles.label}>Email (optional)</Text>
           <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholderTextColor={colors.textMuted} placeholder="you@company.com" keyboardType="email-address" autoCapitalize="none" />
 
           <Text style={styles.label}>Password</Text>
           <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholderTextColor={colors.textMuted} placeholder="Min 8 characters" secureTextEntry />
 
-          <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={isLoading}>
-            {isLoading ? <ActivityIndicator color={colors.bg} /> : <Text style={styles.buttonText}>Create Account</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleSendCode} disabled={isLoading}>
+            {isLoading ? <ActivityIndicator color={colors.bg} /> : <Text style={styles.buttonText}>Verify Mobile & Continue</Text>}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.goBack()}>

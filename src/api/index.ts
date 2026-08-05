@@ -57,15 +57,29 @@ api.interceptors.response.use(
 export default api;
 
 // ─── Auth ────────────────────────────────────────────
+export interface RegisterPayload {
+  name: string;
+  role: string;
+  password: string;
+  phone: string;
+  otpCode: string;
+  email?: string;
+}
+
 export const authAPI = {
-  login: (email: string, password: string) =>
-    api.post("/auth/login", { email, password }),
-  register: (data: { email: string; password: string; name: string; role: string }) =>
+  login: (identifier: string, password: string) =>
+    api.post("/auth/login", { identifier, password }),
+  register: (data: RegisterPayload) =>
     api.post("/auth/register", data),
   me: () => api.get("/auth/me"),
   logout: () => api.post("/auth/logout"),
   refreshToken: (refreshToken: string) =>
     api.post("/auth/refresh", { refreshToken }),
+  sendOtp: (phone: string) => api.post("/auth/send-otp", { phone }),
+  verifyOtp: (phone: string, code: string) =>
+    api.post("/auth/verify-otp", { phone, code }),
+  otpLogin: (phone: string, code: string) =>
+    api.post("/auth/otp-login", { phone, code }),
 };
 
 // ─── Hotel Buyer ─────────────────────────────────────

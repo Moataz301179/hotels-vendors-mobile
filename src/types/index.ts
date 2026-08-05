@@ -10,6 +10,8 @@ export interface User {
   name: string;
   role: UserRole;
   tenantId: string;
+  phone?: string | null;
+  phoneVerifiedAt?: string | null;
 }
 
 export interface Product {

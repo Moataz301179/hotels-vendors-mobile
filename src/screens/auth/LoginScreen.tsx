@@ -10,17 +10,17 @@ import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
 
 export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const { login, isLoading } = useAuthStore();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Email and password are required");
+    if (!identifier || !password) {
+      Alert.alert("Error", "Email/mobile and password are required");
       return;
     }
     try {
-      await login(email, password);
+      await login(identifier.trim(), password);
     } catch (err: any) {
       Alert.alert("Login Failed", err.message || "Invalid credentials");
     }
@@ -38,14 +38,13 @@ export default function LoginScreen({ navigation }: any) {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Email or Mobile Number</Text>
           <TextInput
             style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="you@hotel.com"
+            value={identifier}
+            onChangeText={setIdentifier}
+            placeholder="you@hotel.com or +20 1X0 XXX XXXX"
             placeholderTextColor={colors.textMuted}
-            keyboardType="email-address"
             autoCapitalize="none"
           />
 
@@ -69,6 +68,10 @@ export default function LoginScreen({ navigation }: any) {
 
           <TouchableOpacity onPress={() => navigation.navigate("Register")}>
             <Text style={styles.link}>Don't have an account? Sign Up</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate("OtpLogin")}>
+            <Text style={styles.linkMuted}>Sign in with mobile & OTP</Text>
           </TouchableOpacity>
         </View>
 
@@ -107,5 +110,6 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: colors.bg, fontWeight: "600", fontSize: 16 },
   link: { color: colors.primary, textAlign: "center", marginTop: spacing.lg, ...typography.bodySmall },
+  linkMuted: { color: colors.textMuted, textAlign: "center", marginTop: spacing.sm, ...typography.bodySmall },
   trust: { ...typography.caption, color: colors.textMuted, textAlign: "center", marginTop: spacing.xxl },
 });

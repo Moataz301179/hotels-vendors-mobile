@@ -14,6 +14,8 @@ import { useAuthStore } from "@/store/auth";
 // Auth screens
 import LoginScreen from "@/screens/auth/LoginScreen";
 import RegisterScreen from "@/screens/auth/RegisterScreen";
+import OtpScreen from "@/screens/auth/OtpScreen";
+import OtpLoginScreen from "@/screens/auth/OtpLoginScreen";
 
 // Hotel screens
 import HotelHomeScreen from "@/screens/hotel/HotelHomeScreen";
@@ -117,6 +119,8 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Otp" component={OtpScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="OtpLogin" component={OtpLoginScreen} options={{ headerShown: false }} />
           </>
         ) : role === "SUPPLIER" ? (
           <Stack.Screen name="SupplierMain" component={SupplierTabs} options={{ headerShown: false }} />
