@@ -89,6 +89,13 @@ export const hotelAPI = {
   orders: (params?: Record<string, string>) =>
     api.get("/hotel/orders", { params }),
   spend: () => api.get("/hotel/spend"),
+  credit: () => api.get("/hotel/credit"),
+  cashflow: () => api.get("/hotel/cashflow"),
+  financing: () => api.get("/hotel/financing"),
+  scheduledOrders: () => api.get("/hotel/scheduled-orders"),
+  updateScheduledOrder: (id: string, data: Record<string, unknown>) =>
+    api.patch(`/hotel/scheduled-orders/${id}`, data),
+  reconciliations: () => api.get("/hotel/inventory/reconciliations"),
 };
 
 // ─── Supplier ────────────────────────────────────────

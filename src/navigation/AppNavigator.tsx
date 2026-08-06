@@ -32,6 +32,11 @@ import InvoiceDetailScreen from "@/screens/hotel/InvoiceDetailScreen";
 import PaymentScreen from "@/screens/hotel/PaymentScreen";
 import NotificationCenterScreen from "@/screens/NotificationCenterScreen";
 import AiAssistantScreen from "@/screens/AiAssistantScreen";
+import HotelCreditScreen from "@/screens/hotel/HotelCreditScreen";
+import HotelCashflowScreen from "@/screens/hotel/HotelCashflowScreen";
+import HotelFinancingScreen from "@/screens/hotel/HotelFinancingScreen";
+import ScheduledOrdersScreen from "@/screens/hotel/ScheduledOrdersScreen";
+import InventoryBalanceScreen from "@/screens/hotel/InventoryBalanceScreen";
 
 // Supplier screens
 import SupplierDashboardScreen from "@/screens/supplier/SupplierDashboardScreen";
@@ -50,6 +55,7 @@ import FactoringOfferDetailScreen from "@/screens/supplier/FactoringOfferDetailS
 
 const Stack = createNativeStackNavigator();
 const FinanceStackNav = createNativeStackNavigator();
+const HotelFinanceStackNav = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const screenOptions = {
@@ -100,10 +106,26 @@ function HotelTabs() {
         options={{ title: "Invoices", tabBarLabel: "Invoices", tabBarIcon: ({ color, size }) => <FileText size={size} color={color} /> }}
       />
       <Tab.Screen
+        name="FinanceTab" component={HotelFinanceStack}
+        options={{ title: "Finance", tabBarLabel: "Finance", tabBarIcon: ({ color, size }) => <BarChart3 size={size} color={color} /> }}
+      />
+      <Tab.Screen
         name="AssistantTab" component={AiAssistantScreen}
         options={{ title: "AI Assistant", tabBarLabel: "Assistant", tabBarIcon: ({ color, size }) => <Bot size={size} color={color} /> }}
       />
     </Tab.Navigator>
+  );
+}
+
+function HotelFinanceStack() {
+  return (
+    <HotelFinanceStackNav.Navigator screenOptions={stackScreenOptions}>
+      <HotelFinanceStackNav.Screen name="HotelCashflow" component={HotelCashflowScreen} options={{ title: "Cashflow" }} />
+      <HotelFinanceStackNav.Screen name="HotelCredit" component={HotelCreditScreen} options={{ title: "Credit Overview" }} />
+      <HotelFinanceStackNav.Screen name="HotelFinancing" component={HotelFinancingScreen} options={{ title: "Financing" }} />
+      <HotelFinanceStackNav.Screen name="ScheduledOrders" component={ScheduledOrdersScreen} options={{ title: "Scheduled Orders" }} />
+      <HotelFinanceStackNav.Screen name="InventoryBalance" component={InventoryBalanceScreen} options={{ title: "Inventory Balance" }} />
+    </HotelFinanceStackNav.Navigator>
   );
 }
 
@@ -216,6 +238,11 @@ export default function AppNavigator() {
              <Stack.Screen name="InvoiceDetail" component={InvoiceDetailScreen} options={{ title: "Invoice" }} />
              <Stack.Screen name="PaymentScreen" component={PaymentScreen} options={{ title: "Payment", presentation: "modal" }} />
              <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: "Notifications" }} />
+             <Stack.Screen name="HotelCashflow" component={HotelCashflowScreen} options={{ title: "Cashflow" }} />
+             <Stack.Screen name="HotelCredit" component={HotelCreditScreen} options={{ title: "Credit Overview" }} />
+             <Stack.Screen name="HotelFinancing" component={HotelFinancingScreen} options={{ title: "Financing" }} />
+             <Stack.Screen name="ScheduledOrders" component={ScheduledOrdersScreen} options={{ title: "Scheduled Orders" }} />
+             <Stack.Screen name="InventoryBalance" component={InventoryBalanceScreen} options={{ title: "Inventory Balance" }} />
            </>
         )}
       </Stack.Navigator>
