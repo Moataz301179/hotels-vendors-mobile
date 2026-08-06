@@ -10,7 +10,13 @@
     "scheme": "invo",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hotelsvendors.invo"
+      "bundleIdentifier": "com.hotelsvendors.invo",
+      "infoPlist": {
+        "NSCameraUsageDescription": "INVO needs camera access to photograph invoices for financing.",
+        "NSPhotoLibraryUsageDescription": "INVO needs photo library access to select invoice images.",
+        "NSUserNotificationUsageDescription": "INVO needs permission to send you order and payment updates.",
+        "NSAppleEventsUsageDescription": "INVO needs permission to handle payment callback links."
+      }
     },
     "android": {
       "package": "com.hotelsvendors.invo",
@@ -20,10 +26,22 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "POST_NOTIFICATIONS", "VIBRATE"],
+      "predictiveBackGestureEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "linking": {
+      "prefixes": ["invo://"],
+      "config": {
+        "screens": {
+          "OrderDetail": "orders/:id",
+          "InvoiceDetail": "invoices/:id",
+          "PaymentScreen": "pay/:invoiceId",
+          "NotificationCenter": "notifications"
+        }
+      }
     },
     "extra": {
       "eas": {
