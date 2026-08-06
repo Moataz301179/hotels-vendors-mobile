@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import type { ImagePickerAsset } from "expo-image-picker";
 import { colors, spacing, radii, typography } from "@/theme";
 import { olivAPI } from "@/api";
 
@@ -26,7 +28,6 @@ export default function InvoiceUploadScreen() {
 
   const pickFile = async () => {
     try {
-      const ImagePicker = require("expo-image-picker");
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: false,
@@ -42,7 +43,6 @@ export default function InvoiceUploadScreen() {
 
   const takePhoto = async () => {
     try {
-      const ImagePicker = require("expo-image-picker");
       const permission = await ImagePicker.requestCameraPermissionsAsync();
       if (!permission.granted) {
         Alert.alert("Permission Required", "Camera access is needed to take a photo");
@@ -59,7 +59,7 @@ export default function InvoiceUploadScreen() {
     }
   };
 
-  const handleFileSelected = (asset: { uri: string; fileName?: string }) => {
+  const handleFileSelected = (asset: ImagePickerAsset) => {
     setUploading(true);
     setPreview({
       amount: "",

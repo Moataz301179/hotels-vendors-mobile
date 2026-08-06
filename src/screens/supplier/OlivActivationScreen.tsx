@@ -35,7 +35,7 @@ const BENEFITS = [
 
 type Step = "intro" | "company" | "signatory" | "bank" | "done";
 
-export default function OlivActivationScreen() {
+export default function OlivActivationScreen({ navigation }: any) {
   const { user } = useAuthStore();
   const [step, setStep] = useState<Step>("intro");
   const [loading, setLoading] = useState(false);
@@ -345,6 +345,13 @@ export default function OlivActivationScreen() {
             from this app — funds land in your bank account within 48 hours.
           </Text>
         </View>
+        <TouchableOpacity
+          style={styles.activateBtn}
+          onPress={() => navigation.navigate("OlivKycStatus")}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.activateBtnText}>Check KYC Status</Text>
+        </TouchableOpacity>
       </ScrollView>
     );
   }
