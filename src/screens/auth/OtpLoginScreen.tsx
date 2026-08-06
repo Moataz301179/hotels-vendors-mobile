@@ -6,7 +6,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -16,6 +15,7 @@ import {
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { isValidEgyptianPhone, normalizePhone } from "@/utils/phone";
+import PhoneInput from "@/components/PhoneInput";
 
 export default function OtpLoginScreen({ navigation }: any) {
   const [phone, setPhone] = useState("");
@@ -42,14 +42,7 @@ export default function OtpLoginScreen({ navigation }: any) {
 
         <View style={styles.form}>
           <Text style={styles.label}>Mobile Number</Text>
-          <TextInput
-            style={styles.input}
-            value={phone}
-            onChangeText={(t) => setPhone(t.replace(/[^\d+]/g, "").slice(0, 15))}
-            placeholder="+20 10X XXX XXXX"
-            placeholderTextColor={colors.textMuted}
-            keyboardType="phone-pad"
-          />
+          <PhoneInput value={phone} onChangeText={setPhone} />
 
           <TouchableOpacity style={styles.button} onPress={handleSend}>
             <Text style={styles.buttonText}>Send Code</Text>

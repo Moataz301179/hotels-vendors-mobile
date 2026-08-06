@@ -20,8 +20,14 @@ interface AuthState {
   sendOtp: (phone: string) => Promise<void>;
   logout: () => Promise<void>;
   loadUser: () => Promise<void>;
-  setRole: (role: UserRole) => void;
   restoreSession: () => Promise<void>;
+}
+
+// Backend returns the org role (e.g. "OWNER") in `role` and the platform
+// entry point (e.g. "SUPPLIER"/"HOTEL") in `platformRole`. Routing is driven
+// by platformRole.
+function platformRoleOf(user: User): UserRole {
+  return (user.platformRole ?? user.role) as UserRole;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -38,7 +44,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { accessToken, refreshToken, user } = data.data;
         await SecureStore.setItemAsync("access_token", accessToken);
         if (refreshToken) await SecureStore.setItemAsync("refresh_token", refreshToken);
-        set({ user, role: user.role as UserRole, isAuthenticated: true, isLoading: false });
+        set({ user, role: platformRoleOf(user), isAuthenticated: true, isLoading: false });
       } else {
         throw new Error(data.error || "Login failed");
       }
@@ -56,7 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { accessToken, refreshToken, user } = data.data;
         await SecureStore.setItemAsync("access_token", accessToken);
         if (refreshToken) await SecureStore.setItemAsync("refresh_token", refreshToken);
-        set({ user, role: user.role as UserRole, isAuthenticated: true, isLoading: false });
+        set({ user, role: platformRoleOf(user), isAuthenticated: true, isLoading: false });
       } else {
         throw new Error(data.error || "Registration failed");
       }
@@ -74,7 +80,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { accessToken, refreshToken, user } = data.data;
         await SecureStore.setItemAsync("access_token", accessToken);
         if (refreshToken) await SecureStore.setItemAsync("refresh_token", refreshToken);
-        set({ user, role: user.role as UserRole, isAuthenticated: true, isLoading: false });
+        set({ user, role: platformRoleOf(user), isAuthenticated: true, isLoading: false });
       } else {
         throw new Error(data.error || "Sign-in failed");
       }
@@ -100,21 +106,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { data } = await authAPI.me();
       if (data.success && data.data) {
-        set({ user: data.data, role: data.data.role as UserRole, isAuthenticated: true });
+        set({ user: data.data, role: platformRoleOf(data.data), isAuthenticated: true });
       }
     } catch {
       set({ user: null, isAuthenticated: false });
     }
   },
 
-  setRole: (role: UserRole) => set({ role }),
-
   restoreSession: async () => {
     set({ isLoading: true });
-    const token = await SecureStore.getItemAsync("access_token");
-    if (token) {
-      await get().loadUser();
+    try {
+      const token = await SecureStore.getItemAsync("access_token");
+      if (token) {
+        await get().loadUser();
+      }
+    } catch {
+      set({ user: null, isAuthenticated: false });
+    } finally {
+      set({ isLoading: false });
     }
-    set({ isLoading: false });
   },
 }));

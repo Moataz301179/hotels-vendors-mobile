@@ -10,6 +10,7 @@ import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
 import type { UserRole } from "@/types";
 import { isValidEgyptianPhone, normalizePhone } from "@/utils/phone";
+import PhoneInput from "@/components/PhoneInput";
 
 const ROLES: { value: UserRole; label: string; desc: string }[] = [
   { value: "HOTEL", label: "Hotel Buyer", desc: "Browse & order supplies" },
@@ -73,14 +74,7 @@ export default function RegisterScreen({ navigation }: any) {
           <TextInput style={styles.input} value={name} onChangeText={setName} placeholderTextColor={colors.textMuted} placeholder="John Doe" />
 
           <Text style={styles.label}>Mobile Number</Text>
-          <TextInput
-            style={styles.input}
-            value={phone}
-            onChangeText={(t) => setPhone(t.replace(/[^\d+]/g, "").slice(0, 15))}
-            placeholderTextColor={colors.textMuted}
-            placeholder="+20 10X XXX XXXX"
-            keyboardType="phone-pad"
-          />
+          <PhoneInput value={phone} onChangeText={setPhone} fontSize={15} />
 
           <Text style={styles.label}>Email (optional)</Text>
           <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholderTextColor={colors.textMuted} placeholder="you@company.com" keyboardType="email-address" autoCapitalize="none" />
