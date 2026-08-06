@@ -15,7 +15,8 @@
         "NSCameraUsageDescription": "INVO needs camera access to photograph invoices for financing.",
         "NSPhotoLibraryUsageDescription": "INVO needs photo library access to select invoice images.",
         "NSUserNotificationUsageDescription": "INVO needs permission to send you order and payment updates.",
-        "NSAppleEventsUsageDescription": "INVO needs permission to handle payment callback links."
+        "NSAppleEventsUsageDescription": "INVO needs permission to handle payment callback links.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -26,14 +27,22 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "POST_NOTIFICATIONS", "VIBRATE"],
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "POST_NOTIFICATIONS",
+        "VIBRATE"
+      ],
       "predictiveBackGestureEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "linking": {
-      "prefixes": ["invo://"],
+      "prefixes": [
+        "invo://"
+      ],
       "config": {
         "screens": {
           "OrderDetail": "orders/:id",
