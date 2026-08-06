@@ -65,63 +65,40 @@ export default function AiAssistantScreen({ navigation }: any) {
     setMessages((prev) => [...prev, assistantMsg]);
 
     try {
-      const token = await SecureStore.getItemAsync("access_token");
-      const response = await fetch(
-        `${"https://www.hotelsvendors.com"}/api/v1/ai/assistant`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            messages: fullPayload,
-            question: input.trim(),
-            role,
-            hotelId: user?.hotelId,
-            conversationId: conversationId || undefined,
-          }),
-        }
-      );
+      const response = await aiAPI.ask({
+        messages: fullPayload,
+        question: input.trim(),
+        role,
+        hotelId: user?.hotelId ?? undefined,
+        conversationId: conversationId ?? undefined,
+      });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Failed to get response");
-      }
-
-      const convId = response.headers.get("X-Conversation-Id");
+      // Extract conversation ID from response headers
+      const convId = response.headers?.["x-conversation-id"];
       if (convId && convId !== conversationId) {
         setConversationId(convId);
         await SecureStore.setItemAsync("ai_conversation_id", convId);
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
-          assistantMsg.content += chunk;
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMsg.id ? { ...m, content: assistantMsg.content } : m
-            )
-          );
-        }
+      // Handle streaming response
+      const data = response.data;
+      if (typeof data === "string") {
+        assistantMsg.content = data;
+      } else if (data?.text) {
+        assistantMsg.content = data.text;
+      } else if (data?.content) {
+        assistantMsg.content = data.content;
       } else {
-        const text = await response.text();
-        assistantMsg.content = text;
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMsg.id ? { ...m, content: assistantMsg.content } : m
-          )
-        );
+        assistantMsg.content = JSON.stringify(data);
       }
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantMsg.id ? { ...m, content: assistantMsg.content } : m
+        )
+      );
     } catch (e: any) {
-      const errorMessage = e?.message || "Connection failed";
+      const errorMessage = e?.response?.data?.error || e?.message || "Connection failed";
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMsg.id

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View, Text, ActivityIndicator, StyleSheet, TouchableOpacity, Alert,
-  Linking,
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { paymentAPI } from "@/api";
@@ -54,28 +53,27 @@ export default function PaymentScreen({ navigation, route }: any) {
 
   useEffect(() => {
     createIntent();
-
-    const unsubscribe = Linking.addEventListener("url", (event: any) => {
-      if (event.url.includes("payment-success")) {
-        Alert.alert("Payment Successful", "Your payment has been processed.", [
-          { text: "OK", onPress: () => navigation.goBack() },
-        ]);
-      } else if (event.url.includes("payment-cancel")) {
-        Alert.alert("Payment Cancelled", "The payment was not completed.");
-        navigation.goBack();
-      }
-    });
-
-    return () => unsubscribe.remove();
-  }, [createIntent, navigation]);
+  }, [createIntent]);
 
   const openPaymentUrl = async () => {
     if (!paymentData?.paymentUrl) return;
-    await WebBrowser.openBrowserAsync(paymentData.paymentUrl, {
-      presentationStyle: WebBrowserPresentationStyle.PAGE_SHEET,
-      enableBarCollapsing: true,
-      toolbarColor: colors.bg,
-    });
+    try {
+      await WebBrowser.openBrowserAsync(paymentData.paymentUrl, {
+        presentationStyle: WebBrowserPresentationStyle.PAGE_SHEET,
+        enableBarCollapsing: true,
+        toolbarColor: colors.bg,
+      });
+    } catch (e) {
+      // Browser closed or error
+    } finally {
+      // After browser closes, inform user that payment is being processed
+      // The Paymob callback will update the backend automatically
+      Alert.alert(
+        "Payment Submitted",
+        "Your payment is being processed. You will see the updated status in your invoices.",
+        [{ text: "OK", onPress: () => navigation.goBack() }]
+      );
+    }
   };
 
   if (loading) {
