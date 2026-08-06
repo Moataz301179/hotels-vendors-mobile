@@ -2,16 +2,61 @@
  * HotelsVendors — TypeScript types for mobile app
  */
 
-export type UserRole = "HOTEL" | "SUPPLIER" | "LOGISTICS" | "FACTORING" | "ADMIN";
+export type UserRole = "HOTEL" | "SUPPLIER" | "SHIPPING" | "FACTORING" | "ADMIN";
 
 export interface User {
   id: string;
   email: string;
   name: string;
   role: UserRole;
+  platformRole?: UserRole;
   tenantId: string;
+  hotelId?: string | null;
   phone?: string | null;
   phoneVerifiedAt?: string | null;
+  companyName?: string | null;
+  supplier?: {
+    id: string;
+    name: string;
+    legalName?: string | null;
+    city?: string | null;
+    governorate?: string | null;
+    taxId?: string | null;
+    status?: string;
+    tier?: string;
+  } | null;
+}
+
+export interface SupplierKpis {
+  totalOrders: number;
+  pendingOrders: number;
+  approvedOrders: number;
+  inTransitOrders: number;
+  deliveredOrders: number;
+  totalRevenue: number;
+  productsCount: number;
+  lowStockCount: number;
+}
+
+export interface RecentOrder {
+  id: string;
+  orderNumber: string;
+  poNumber?: string | null;
+  status: OrderStatus | string;
+  total: number;
+  currency: string;
+  createdAt: string;
+  deliveryDate?: string | null;
+  hotelName?: string;
+  hotelCity?: string;
+}
+
+export interface RecentGrn {
+  id: string;
+  grnNumber: string;
+  status: string;
+  receivedAt: string;
+  orderNumber?: string;
 }
 
 export interface Product {

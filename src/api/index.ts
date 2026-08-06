@@ -97,8 +97,26 @@ export const supplierAPI = {
     api.get("/supplier/inventory", { params }),
   orders: (params?: Record<string, string>) =>
     api.get("/supplier/orders", { params }),
+  dashboard: (params?: Record<string, string>) =>
+    api.get("/supplier/dashboard", { params }),
+  order: (id: string) => api.get(`/orders/${id}`),
+  grns: (params?: Record<string, string>) =>
+    api.get("/grn", { params }),
   onboard: (data: Record<string, unknown>) =>
     api.post("/supplier/onboard", data),
+  aiUpload: (products: Array<Record<string, unknown>>) =>
+    api.post("/supplier/ai-upload", { products }),
+  catalogImport: (file: any) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post("/supplier/catalog/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  catalogImportTemplate: () =>
+    api.get("/supplier/catalog/import?template=true", {
+      responseType: "arraybuffer",
+    }),
 };
 
 // ─── Products ────────────────────────────────────────
@@ -129,27 +147,71 @@ export const invoiceAPI = {
 };
 
 // ─── Payments ────────────────────────────────────────
+export interface PaymentIntentRequest {
+  amount: number;
+  currency: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  description?: string;
+  referenceType: "SUBSCRIPTION" | "DOCUMENT_FEE" | "MARKETPLACE_COMMISSION" | "ORDER_DEPOSIT";
+  referenceId?: string;
+}
+
+export interface PaymentIntentResponse {
+  paymentId: string;
+  paymentKey: string;
+  paymentUrl: string | null;
+  paymobOrderId: number | string;
+  amount: number;
+  currency: string;
+  status: string;
+  message: string;
+}
+
 export const paymentAPI = {
-  createIntent: (data: Record<string, unknown>) =>
+  createIntent: (data: PaymentIntentRequest) =>
     api.post("/payments/create-intent", data),
 };
 
 // ─── AI Assistant ────────────────────────────────────
+export interface AiMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+  id?: string;
+}
+
 export const aiAPI = {
-  ask: (message: string, role: string) =>
-    api.post("/ai/assistant", { message, role }),
+  ask: (payload: {
+    messages: AiMessage[];
+    question: string;
+    role: string;
+    conversationId?: string;
+    hotelId?: string;
+  }) => api.post("/ai/assistant", payload, {
+    responseType: "stream",
+  }),
 };
 
 // ─── Oliv Finance (Supplier Factoring) ──────────────
 export const olivAPI = {
-  onboardSupplier: (data: Record<string, unknown>) =>
-    api.post("/oliv/onboard-supplier", data),
-  initiateFactoring: (data: Record<string, unknown>) =>
-    api.post("/oliv/initiate-factoring", data),
-};
+   onboardSupplier: (data: Record<string, unknown>) =>
+     api.post("/oliv/onboard-supplier", data),
+   initiateFactoring: (data: Record<string, unknown>) =>
+     api.post("/oliv/initiate-factoring", data),
+   getKycStatus: () => api.get("/oliv/kyc-status"),
+ };
 
-// ─── Fintech (Credit Facility) ──────────────────────
+// ─── Fintech (Credit Facility + Factoring) ────────────
 export const fintechAPI = {
   getCreditFacility: () => api.get("/fintech/oliv-facility"),
-  getFactoringHistory: () => api.get("/fintech/factoring-history"),
+  getFactoringHistory: () => api.get("/factoring/requests"),
+  getFactoringInvoices: () => api.get("/factoring/invoices"),
+  getCreditLines: () => api.get("/factoring/credit-lines"),
+  marketplaceOffers: () => api.get("/factoring/marketplace"),
+  inquireFactoring: (invoiceId: string) =>
+    api.post("/factoring/inquire", { invoiceId }),
+  triggerFunding: (invoiceId: string, partnerId: string) =>
+    api.post("/factoring/fund", { invoiceId, partnerId }),
 };

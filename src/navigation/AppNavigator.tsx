@@ -10,6 +10,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { colors, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
+import { useNotificationStore } from "@/store/notifications";
+import {
+  Home, ShoppingBasket, Package, ShoppingCart, FileText,
+  LayoutDashboard, ClipboardList, Layers, BarChart3, User, Bot,
+} from "lucide-react-native";
 
 // Auth screens
 import LoginScreen from "@/screens/auth/LoginScreen";
@@ -23,14 +28,25 @@ import CatalogScreen from "@/screens/hotel/CatalogScreen";
 import CartScreen from "@/screens/hotel/CartScreen";
 import OrdersScreen from "@/screens/hotel/OrdersScreen";
 import InvoicesScreen from "@/screens/hotel/InvoicesScreen";
+import InvoiceDetailScreen from "@/screens/hotel/InvoiceDetailScreen";
+import PaymentScreen from "@/screens/hotel/PaymentScreen";
+import NotificationCenterScreen from "@/screens/NotificationCenterScreen";
+import AiAssistantScreen from "@/screens/AiAssistantScreen";
 
 // Supplier screens
 import SupplierDashboardScreen from "@/screens/supplier/SupplierDashboardScreen";
 import SupplierOrdersScreen from "@/screens/supplier/SupplierOrdersScreen";
+import SupplierCatalogScreen from "@/screens/supplier/SupplierCatalogScreen";
+import GrnScreen from "@/screens/supplier/GrnScreen";
+import OrderDetailScreen from "@/screens/supplier/OrderDetailScreen";
+import ProfileScreen from "@/screens/supplier/ProfileScreen";
 import OlivActivationScreen from "@/screens/supplier/OlivActivationScreen";
+import OlivKycStatusScreen from "@/screens/supplier/OlivKycStatusScreen";
 import InvoiceUploadScreen from "@/screens/supplier/InvoiceUploadScreen";
 import CreditFacilityScreen from "@/screens/supplier/CreditFacilityScreen";
 import FactoringHistoryScreen from "@/screens/supplier/FactoringHistoryScreen";
+import MarketplaceScreen from "@/screens/supplier/MarketplaceScreen";
+import FactoringOfferDetailScreen from "@/screens/supplier/FactoringOfferDetailScreen";
 
 const Stack = createNativeStackNavigator();
 const FinanceStackNav = createNativeStackNavigator();
@@ -53,19 +69,40 @@ function HotelTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarStyle: { backgroundColor: colors.tabBg, borderTopColor: colors.tabBorder, paddingBottom: 4 },
+        tabBarStyle: { backgroundColor: colors.tabBg, borderTopColor: colors.tabBorder, paddingBottom: 4, height: 70 },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarLabelStyle: { fontSize: 11, marginTop: 2 },
         headerStyle: { backgroundColor: colors.bg },
         headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: "600" as const },
+        tabBarShowLabel: true,
       }}
     >
-      <Tab.Screen name="Home" component={HotelHomeScreen} options={{ title: "INVO", tabBarLabel: "Home" }} />
-      <Tab.Screen name="CatalogTab" component={CatalogScreen} options={{ title: "Catalog", tabBarLabel: "Catalog" }} />
-      <Tab.Screen name="CartTab" component={CartScreen} options={{ title: "Cart", tabBarLabel: "Cart" }} />
-      <Tab.Screen name="OrdersTab" component={OrdersScreen} options={{ title: "Orders", tabBarLabel: "Orders" }} />
-      <Tab.Screen name="InvoicesTab" component={InvoicesScreen} options={{ title: "Invoices", tabBarLabel: "Invoices" }} />
+      <Tab.Screen
+        name="Home" component={HotelHomeScreen}
+        options={{ title: "INVO", tabBarLabel: "Home", tabBarIcon: ({ color, size }) => <Home size={size} color={color} /> }}
+      />
+      <Tab.Screen
+        name="CatalogTab" component={CatalogScreen}
+        options={{ title: "Catalog", tabBarLabel: "Catalog", tabBarIcon: ({ color, size }) => <ShoppingBasket size={size} color={color} /> }}
+      />
+      <Tab.Screen
+        name="CartTab" component={CartScreen}
+        options={{ title: "Cart", tabBarLabel: "Cart", tabBarIcon: ({ color, size }) => <ShoppingCart size={size} color={color} /> }}
+      />
+      <Tab.Screen
+        name="OrdersTab" component={OrdersScreen}
+        options={{ title: "Orders", tabBarLabel: "Orders", tabBarIcon: ({ color, size }) => <ClipboardList size={size} color={color} /> }}
+      />
+      <Tab.Screen
+        name="InvoicesTab" component={InvoicesScreen}
+        options={{ title: "Invoices", tabBarLabel: "Invoices", tabBarIcon: ({ color, size }) => <FileText size={size} color={color} /> }}
+      />
+      <Tab.Screen
+        name="AssistantTab" component={AiAssistantScreen}
+        options={{ title: "AI Assistant", tabBarLabel: "Assistant", tabBarIcon: ({ color, size }) => <Bot size={size} color={color} /> }}
+      />
     </Tab.Navigator>
   );
 }
@@ -74,10 +111,13 @@ function FinanceStack() {
   return (
     <FinanceStackNav.Navigator screenOptions={stackScreenOptions}>
       <FinanceStackNav.Screen name="OlivActivation" component={OlivActivationScreen} options={{ title: "Oliv Financing" }} />
+      <FinanceStackNav.Screen name="OlivKycStatus" component={OlivKycStatusScreen} options={{ title: "KYC Status" }} />
       <FinanceStackNav.Screen name="InvoiceUpload" component={InvoiceUploadScreen} options={{ title: "Upload Invoice" }} />
       <FinanceStackNav.Screen name="CreditFacility" component={CreditFacilityScreen} options={{ title: "Credit Facility" }} />
-      <FinanceStackNav.Screen name="FactoringHistory" component={FactoringHistoryScreen} options={{ title: "Factoring History" }} />
-    </FinanceStackNav.Navigator>
+       <FinanceStackNav.Screen name="FactoringHistory" component={FactoringHistoryScreen} options={{ title: "Factoring History" }} />
+       <FinanceStackNav.Screen name="Marketplace" component={MarketplaceScreen} options={{ title: "Factoring Marketplace" }} />
+       <FinanceStackNav.Screen name="FactoringOfferDetail" component={FactoringOfferDetailScreen} options={{ title: "Offer Details" }} />
+     </FinanceStackNav.Navigator>
   );
 }
 
@@ -85,18 +125,58 @@ function SupplierTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarStyle: { backgroundColor: colors.tabBg, borderTopColor: colors.tabBorder, paddingBottom: 4 },
+        tabBarStyle: { backgroundColor: colors.tabBg, borderTopColor: colors.tabBorder, paddingBottom: 4, height: 70 },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarLabelStyle: { fontSize: 11, marginTop: 2 },
         headerStyle: { backgroundColor: colors.bg },
         headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: "600" as const },
+        tabBarShowLabel: true,
       }}
     >
-      <Tab.Screen name="Dashboard" component={SupplierDashboardScreen} options={{ title: "Vendor Central" }} />
-      <Tab.Screen name="Orders" component={SupplierOrdersScreen} options={{ title: "Orders" }} />
-      <Tab.Screen name="Finance" component={FinanceStack} options={{ title: "Finance", tabBarLabel: "Finance" }} />
-      <Tab.Screen name="Invoices" component={InvoiceUploadScreen} options={{ title: "Invoices", tabBarLabel: "Invoices" }} />
+      <Tab.Screen
+        name="DashboardTab" component={SupplierDashboardScreen}
+        options={{
+          title: "Vendor Central", tabBarLabel: "Home",
+          tabBarIcon: ({ color, size }) => <LayoutDashboard size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="OrdersTab" component={SupplierOrdersScreen}
+        options={{
+          title: "Orders", tabBarLabel: "Orders",
+          tabBarIcon: ({ color, size }) => <ClipboardList size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="CatalogTab" component={SupplierCatalogScreen}
+        options={{
+          title: "Catalog", tabBarLabel: "Catalog",
+          tabBarIcon: ({ color, size }) => <Package size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="FinanceTab" component={FinanceStack}
+        options={{
+          title: "Finance", tabBarLabel: "Finance",
+          tabBarIcon: ({ color, size }) => <BarChart3 size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="ProfileTab" component={ProfileScreen}
+        options={{
+          title: "Profile", tabBarLabel: "Profile",
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="AssistantTab" component={AiAssistantScreen}
+        options={{
+          title: "AI Assistant", tabBarLabel: "Assistant",
+          tabBarIcon: ({ color, size }) => <Bot size={size} color={color} />,
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -122,10 +202,21 @@ export default function AppNavigator() {
             <Stack.Screen name="Otp" component={OtpScreen} options={{ headerShown: false }} />
             <Stack.Screen name="OtpLogin" component={OtpLoginScreen} options={{ headerShown: false }} />
           </>
-        ) : role === "SUPPLIER" ? (
-          <Stack.Screen name="SupplierMain" component={SupplierTabs} options={{ headerShown: false }} />
+         ) : role === "SUPPLIER" ? (
+          <>
+            <Stack.Screen name="SupplierMain" component={SupplierTabs} options={{ headerShown: false }} />
+            <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: "Order" }} />
+            <Stack.Screen name="SupplierGrn" component={GrnScreen} options={{ title: "Goods Received (GRN)" }} />
+            <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: "Notifications" }} />
+          </>
         ) : (
-          <Stack.Screen name="HotelMain" component={HotelTabs} options={{ headerShown: false }} />
+           <>
+             <Stack.Screen name="HotelMain" component={HotelTabs} options={{ headerShown: false }} />
+             <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: "Order" }} />
+             <Stack.Screen name="InvoiceDetail" component={InvoiceDetailScreen} options={{ title: "Invoice" }} />
+             <Stack.Screen name="PaymentScreen" component={PaymentScreen} options={{ title: "Payment", presentation: "modal" }} />
+             <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: "Notifications" }} />
+           </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
