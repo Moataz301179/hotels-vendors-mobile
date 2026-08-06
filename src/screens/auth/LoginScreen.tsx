@@ -70,6 +70,10 @@ export default function LoginScreen({ navigation }: any) {
             <Text style={styles.link}>Don't have an account? Sign Up</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+            <Text style={styles.linkMuted}>Forgot Password?</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity onPress={() => navigation.navigate("OtpLogin")}>
             <Text style={styles.linkMuted}>Sign in with mobile & OTP</Text>
           </TouchableOpacity>

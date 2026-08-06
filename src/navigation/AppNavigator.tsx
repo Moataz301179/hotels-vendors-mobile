@@ -21,6 +21,7 @@ import LoginScreen from "@/screens/auth/LoginScreen";
 import RegisterScreen from "@/screens/auth/RegisterScreen";
 import OtpScreen from "@/screens/auth/OtpScreen";
 import OtpLoginScreen from "@/screens/auth/OtpLoginScreen";
+import ForgotPasswordScreen from "@/screens/auth/ForgotPasswordScreen";
 
 // Hotel screens
 import HotelHomeScreen from "@/screens/hotel/HotelHomeScreen";
@@ -56,6 +57,9 @@ import FactoringOfferDetailScreen from "@/screens/supplier/FactoringOfferDetailS
 // Shipping screens
 import DriverDeliveryScreen from "@/screens/shipping/DriverDeliveryScreen";
 import PODScreen from "@/screens/shipping/PODScreen";
+
+// Onboarding
+import OnboardingProgressScreen from "@/screens/OnboardingProgressScreen";
 
 const Stack = createNativeStackNavigator();
 const FinanceStackNav = createNativeStackNavigator();
@@ -257,18 +261,21 @@ export default function AppNavigator() {
             <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Otp" component={OtpScreen} options={{ headerShown: false }} />
             <Stack.Screen name="OtpLogin" component={OtpLoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: "Reset Password" }} />
           </>
          ) : role === "SUPPLIER" ? (
           <>
             <Stack.Screen name="SupplierMain" component={SupplierTabs} options={{ headerShown: false }} />
             <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: "Order" }} />
             <Stack.Screen name="SupplierGrn" component={GrnScreen} options={{ title: "Goods Received (GRN)" }} />
+            <Stack.Screen name="OnboardingProgress" component={OnboardingProgressScreen} options={{ title: "Your Progress" }} />
             <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: "Notifications" }} />
           </>
          ) : role === "SHIPPING" ? (
           <>
             <Stack.Screen name="ShippingMain" component={ShippingTabs} options={{ headerShown: false }} />
             <Stack.Screen name="PODScreen" component={PODScreen} options={{ title: "Proof of Delivery" }} />
+            <Stack.Screen name="OnboardingProgress" component={OnboardingProgressScreen} options={{ title: "Your Progress" }} />
             <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: "Notifications" }} />
           </>
         ) : (
@@ -277,6 +284,7 @@ export default function AppNavigator() {
              <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: "Order" }} />
              <Stack.Screen name="InvoiceDetail" component={InvoiceDetailScreen} options={{ title: "Invoice" }} />
              <Stack.Screen name="PaymentScreen" component={PaymentScreen} options={{ title: "Payment", presentation: "modal" }} />
+             <Stack.Screen name="OnboardingProgress" component={OnboardingProgressScreen} options={{ title: "Your Progress" }} />
              <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: "Notifications" }} />
              <Stack.Screen name="HotelCashflow" component={HotelCashflowScreen} options={{ title: "Cashflow" }} />
              <Stack.Screen name="HotelCredit" component={HotelCreditScreen} options={{ title: "Credit Overview" }} />

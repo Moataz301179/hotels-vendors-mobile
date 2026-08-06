@@ -210,6 +210,13 @@ export const olivAPI = {
    getKycStatus: () => api.get("/oliv/kyc-status"),
  };
 
+// ─── Onboarding ─────────────────────────────────────
+export const onboardingAPI = {
+  getProgress: () => api.get("/onboarding/progress"),
+  updateStep: (stepKey: string, completed: boolean, data?: Record<string, unknown>) =>
+    api.post("/onboarding/progress", { stepKey, completed, data }),
+};
+
 // ─── Fintech (Credit Facility + Factoring) ────────────
 export const fintechAPI = {
   getCreditFacility: () => api.get("/fintech/oliv-facility"),
