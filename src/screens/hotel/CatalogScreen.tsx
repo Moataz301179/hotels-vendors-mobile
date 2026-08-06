@@ -40,6 +40,13 @@ export default function CatalogScreen() {
 
   const renderProduct = ({ item }: { item: Product }) => (
     <TouchableOpacity style={styles.card}>
+      {item.imageUrl ? (
+        <Image source={{ uri: item.imageUrl }} style={styles.cardImage} resizeMode="cover" />
+      ) : (
+        <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
+          <Text style={styles.cardImageText}>📦</Text>
+        </View>
+      )}
       <View style={styles.cardBody}>
         <Text style={styles.cardName}>{item.name}</Text>
         <Text style={styles.cardSku}>{item.sku}</Text>
@@ -111,6 +118,9 @@ const styles = StyleSheet.create({
   catLabelActive: { color: colors.primary, fontWeight: "600" },
   list: { padding: spacing.lg, gap: spacing.md },
   card: { flexDirection: "row", alignItems: "center", backgroundColor: colors.bgCard, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  cardImage: { width: 56, height: 56, borderRadius: radii.sm, marginRight: spacing.md },
+  cardImagePlaceholder: { backgroundColor: colors.bgInput, alignItems: "center", justifyContent: "center" },
+  cardImageText: { fontSize: 24 },
   cardBody: { flex: 1 },
   cardName: { ...typography.h3, color: colors.text },
   cardSku: { ...typography.caption, color: colors.textMuted, marginTop: 2 },

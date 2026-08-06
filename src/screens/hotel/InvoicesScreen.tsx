@@ -4,13 +4,13 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, FlatList, StyleSheet, RefreshControl,
+  View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl,
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { invoiceAPI } from "@/api";
 import type { Invoice } from "@/types";
 
-export default function InvoicesScreen() {
+export default function InvoicesScreen({ navigation }: any) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -23,28 +23,32 @@ export default function InvoicesScreen() {
 
   useEffect(() => { fetchInvoices(); }, []);
 
-  const renderItem = ({ item }: { item: Invoice }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.invoiceNum}>{item.invoiceNumber}</Text>
-        <View style={[styles.statusDot, { backgroundColor: item.status === "PAID" ? colors.success : colors.pending }]} />
-      </View>
-      <Text style={styles.supplier}>{item.supplierName || "—"}</Text>
-      <View style={styles.cardFooter}>
-        <View>
-          <Text style={styles.amount}>EGP {item.totalAmount.toLocaleString()}</Text>
-          <Text style={styles.vat}>VAT: EGP {item.vatAmount.toLocaleString()}</Text>
+   const renderItem = ({ item }: { item: Invoice }) => (
+     <TouchableOpacity
+       style={styles.card}
+       onPress={() => navigation.navigate("InvoiceDetail", { id: item.id })}
+       activeOpacity={0.7}
+      >
+        <View style={styles.cardHeader}>
+          <Text style={styles.invoiceNum}>{item.invoiceNumber}</Text>
+          <View style={[styles.statusDot, { backgroundColor: item.status === "PAID" ? colors.success : colors.pending }]} />
         </View>
-        <View style={styles.etaRow}>
-          {item.etaStatus && (
-            <View style={styles.etaBadge}>
-              <Text style={styles.etaText}>ETA: {item.etaStatus}</Text>
-            </View>
-          )}
-          <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+        <Text style={styles.supplier}>{item.supplierName || "—"}</Text>
+        <View style={styles.cardFooter}>
+          <View>
+            <Text style={styles.amount}>EGP {item.totalAmount.toLocaleString()}</Text>
+            <Text style={styles.vat}>VAT: EGP {item.vatAmount.toLocaleString()}</Text>
+          </View>
+          <View style={styles.etaRow}>
+            {item.etaStatus && (
+              <View style={styles.etaBadge}>
+                <Text style={styles.etaText}>ETA: {item.etaStatus}</Text>
+              </View>
+            )}
+            <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+          </View>
         </View>
-      </View>
-    </View>
+      </TouchableOpacity>
   );
 
   return (

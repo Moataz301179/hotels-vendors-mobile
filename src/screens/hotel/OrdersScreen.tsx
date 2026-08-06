@@ -20,7 +20,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   CANCELLED: colors.textMuted,
 };
 
-export default function OrdersScreen() {
+export default function OrdersScreen({ navigation }: any) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -34,7 +34,11 @@ export default function OrdersScreen() {
   useEffect(() => { fetchOrders(); }, []);
 
   const renderItem = ({ item }: { item: Order }) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate("OrderDetail", { id: item.id })}
+      activeOpacity={0.7}
+    >
       <View style={styles.cardHeader}>
         <Text style={styles.orderNum}>{item.orderNumber}</Text>
         <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[item.status] + "20" }]}>
