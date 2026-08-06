@@ -13,7 +13,7 @@ import { useAuthStore } from "@/store/auth";
 import { useNotificationStore } from "@/store/notifications";
 import {
   Home, ShoppingBasket, Package, ShoppingCart, FileText,
-  LayoutDashboard, ClipboardList, Layers, BarChart3, User, Bot,
+  LayoutDashboard, ClipboardList, Layers, BarChart3, User, Bot, Truck,
 } from "lucide-react-native";
 
 // Auth screens
@@ -52,6 +52,10 @@ import CreditFacilityScreen from "@/screens/supplier/CreditFacilityScreen";
 import FactoringHistoryScreen from "@/screens/supplier/FactoringHistoryScreen";
 import MarketplaceScreen from "@/screens/supplier/MarketplaceScreen";
 import FactoringOfferDetailScreen from "@/screens/supplier/FactoringOfferDetailScreen";
+
+// Shipping screens
+import DriverDeliveryScreen from "@/screens/shipping/DriverDeliveryScreen";
+import PODScreen from "@/screens/shipping/PODScreen";
 
 const Stack = createNativeStackNavigator();
 const FinanceStackNav = createNativeStackNavigator();
@@ -203,6 +207,36 @@ function SupplierTabs() {
   );
 }
 
+function ShippingTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarStyle: { backgroundColor: colors.tabBg, borderTopColor: colors.tabBorder, paddingBottom: 4, height: 70 },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarLabelStyle: { fontSize: 11, marginTop: 2 },
+        headerStyle: { backgroundColor: colors.bg },
+        headerTintColor: colors.text,
+        headerTitleStyle: { fontWeight: "600" as const },
+        tabBarShowLabel: true,
+      }}
+    >
+      <Tab.Screen
+        name="DeliveriesTab" component={DriverDeliveryScreen}
+        options={{ title: "My Deliveries", tabBarLabel: "Deliveries", tabBarIcon: ({ color, size }) => <Truck size={size} color={color} /> }}
+      />
+      <Tab.Screen
+        name="ProfileTab" component={ProfileScreen}
+        options={{ title: "Profile", tabBarLabel: "Profile", tabBarIcon: ({ color, size }) => <User size={size} color={color} /> }}
+      />
+      <Tab.Screen
+        name="AssistantTab" component={AiAssistantScreen}
+        options={{ title: "AI Assistant", tabBarLabel: "Assistant", tabBarIcon: ({ color, size }) => <Bot size={size} color={color} /> }}
+      />
+    </Tab.Navigator>
+  );
+}
+
 export default function AppNavigator() {
   const { isAuthenticated, role, isLoading } = useAuthStore();
 
@@ -229,6 +263,12 @@ export default function AppNavigator() {
             <Stack.Screen name="SupplierMain" component={SupplierTabs} options={{ headerShown: false }} />
             <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: "Order" }} />
             <Stack.Screen name="SupplierGrn" component={GrnScreen} options={{ title: "Goods Received (GRN)" }} />
+            <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: "Notifications" }} />
+          </>
+         ) : role === "SHIPPING" ? (
+          <>
+            <Stack.Screen name="ShippingMain" component={ShippingTabs} options={{ headerShown: false }} />
+            <Stack.Screen name="PODScreen" component={PODScreen} options={{ title: "Proof of Delivery" }} />
             <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: "Notifications" }} />
           </>
         ) : (
