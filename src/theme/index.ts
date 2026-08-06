@@ -1,16 +1,19 @@
 /**
- * Invo Mobile — Design Tokens (Variant B: dark blue-black + muted gold)
- * Approved 2026-08-04 (skill-generated design-system/invo/MASTER.md)
- * Dark blue-black background, white text, light/dark grey hierarchy,
- * muted champagne gold accent (#D4AF37). Title weights capped at 600.
+ * Invo Mobile — Design Tokens (Corporate Indigo)
+ * Dark blue-black background, white text, indigo accent (#312E81).
  * Semantic status colors (green/amber/red) used for order states only.
  */
 
 export const colors = {
-  // Brand accent (muted champagne gold, AA on dark surfaces ~9.2:1)
-  primary: "#D4AF37",
-  primaryDark: "#B8962E",
-  primaryMuted: "rgba(212,175,55,0.14)",
+  // Brand accent (deep indigo, AA on dark surfaces)
+  primary: "#312E81",
+  primaryDark: "#1E1B4B",
+  primaryMuted: "rgba(49,46,129,0.14)",
+
+  // Accent (royal blue)
+  accent: "#6366F1",
+  accentLight: "#818CF8",
+  accentMuted: "rgba(99,102,241,0.14)",
 
   // Background layers (dark blue-black, slate-tinted)
   bg: "#0A0E1A",
@@ -29,15 +32,15 @@ export const colors = {
   textMuted: "rgba(242,244,248,0.48)",
 
   // Status (semantic only, never brand)
-  success: "#22C55E",
+  success: "#059669",
   warning: "#F59E0B",
-  error: "#EF4444",
-  info: "#F2F4F8",
+  error: "#DC2626",
+  info: "#3B82F6",
 
   // Semantic
-  approved: "#22C55E",
+  approved: "#059669",
   pending: "#F59E0B",
-  rejected: "#EF4444",
+  rejected: "#DC2626",
   disbursed: "#E2E4E9",
 
   // Tab bar
