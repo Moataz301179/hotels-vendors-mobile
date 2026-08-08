@@ -13,7 +13,7 @@ import { useAuthStore } from "@/store/auth";
 import { useNotificationStore } from "@/store/notifications";
 import {
   Home, ShoppingBasket, Package, ShoppingCart, FileText,
-  LayoutDashboard, ClipboardList, Layers, BarChart3, User, Bot, Truck,
+  LayoutDashboard, ClipboardList, Layers, BarChart3, User, Bot, Truck, Users,
 } from "lucide-react-native";
 
 // Auth screens
@@ -33,6 +33,7 @@ import InvoiceDetailScreen from "@/screens/hotel/InvoiceDetailScreen";
 import PaymentScreen from "@/screens/hotel/PaymentScreen";
 import NotificationCenterScreen from "@/screens/NotificationCenterScreen";
 import AiAssistantScreen from "@/screens/AiAssistantScreen";
+import ReferralScreen from "@/screens/shared/ReferralScreen";
 import HotelCreditScreen from "@/screens/hotel/HotelCreditScreen";
 import HotelCashflowScreen from "@/screens/hotel/HotelCashflowScreen";
 import HotelFinancingScreen from "@/screens/hotel/HotelFinancingScreen";
@@ -119,6 +120,10 @@ function HotelTabs() {
         options={{ title: "Finance", tabBarLabel: "Finance", tabBarIcon: ({ color, size }) => <BarChart3 size={size} color={color} /> }}
       />
       <Tab.Screen
+        name="ReferralTab" component={ReferralScreen}
+        options={{ title: "Invite", tabBarLabel: "Invite", tabBarIcon: ({ color, size }) => <Users size={size} color={color} /> }}
+      />
+      <Tab.Screen
         name="AssistantTab" component={AiAssistantScreen}
         options={{ title: "AI Assistant", tabBarLabel: "Assistant", tabBarIcon: ({ color, size }) => <Bot size={size} color={color} /> }}
       />
@@ -192,6 +197,13 @@ function SupplierTabs() {
         options={{
           title: "Finance", tabBarLabel: "Finance",
           tabBarIcon: ({ color, size }) => <BarChart3 size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="ReferralTab" component={ReferralScreen}
+        options={{
+          title: "Invite", tabBarLabel: "Invite",
+          tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
         }}
       />
       <Tab.Screen
