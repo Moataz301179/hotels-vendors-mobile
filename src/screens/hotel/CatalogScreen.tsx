@@ -1,5 +1,6 @@
 /**
  * Catalog Screen — Hotel Buyer
+ * Sourced from canonical categories in @/categories
  */
 
 import React, { useEffect, useState } from "react";
@@ -9,23 +10,32 @@ import {
 import { colors, spacing, radii, typography } from "@/theme";
 import { productAPI } from "@/api";
 import { useCartStore } from "@/store/cart";
+import { getCategoryLabel } from "@/categories";
 import type { Product } from "@/types";
 
-const CATEGORIES = ["All", "F&B", "Housekeeping", "Amenities", "Engineering", "Capital Equipment"];
+/** Prisma-style category options for server-side filtering */
+const CATEGORY_OPTIONS = [
+  { value: "ALL", label: "All" },
+  { value: "F_AND_B", label: "F&B" },
+  { value: "CONSUMABLES", label: "OS&E" },
+  { value: "GUEST_SUPPLIES", label: "Guest Supplies" },
+  { value: "FFE", label: "FFE" },
+  { value: "SERVICES", label: "Engineering" },
+];
 
 export default function CatalogScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
+  const [category, setCategory] = useState("ALL");
   const addItem = useCartStore((s) => s.addItem);
 
   const fetchProducts = async () => {
     try {
       const params: Record<string, string> = {};
       if (search) params.search = search;
-      if (category !== "All") params.category = category;
+      if (category !== "ALL") params.category = category;
       const { data } = await productAPI.list(params);
       if (data.success && data.data) setProducts(data.data);
     } catch {} finally {
@@ -81,16 +91,18 @@ export default function CatalogScreen() {
 
       <FlatList
         horizontal
-        data={CATEGORIES}
-        keyExtractor={(item) => item}
+        data={CATEGORY_OPTIONS}
+        keyExtractor={(item) => item.value}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categories}
         renderItem={({ item: cat }) => (
           <TouchableOpacity
-            style={[styles.catChip, category === cat && styles.catChipActive]}
-            onPress={() => setCategory(cat)}
+            style={[styles.catChip, category === cat.value && styles.catChipActive]}
+            onPress={() => setCategory(cat.value)}
           >
-            <Text style={[styles.catLabel, category === cat && styles.catLabelActive]}>{cat}</Text>
+            <Text style={[styles.catLabel, category === cat.value && styles.catLabelActive]}>
+              {cat.label}
+            </Text>
           </TouchableOpacity>
         )}
       />

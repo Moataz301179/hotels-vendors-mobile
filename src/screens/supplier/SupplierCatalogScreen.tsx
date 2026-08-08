@@ -16,6 +16,8 @@ import {
   RefreshCw, Tag, BarChart3, Download,
 } from "lucide-react-native";
 
+import { getCategoryLabel } from "@/categories";
+
 type FilterType = "all" | "low-stock" | "out-of-stock";
 
 interface Product {
