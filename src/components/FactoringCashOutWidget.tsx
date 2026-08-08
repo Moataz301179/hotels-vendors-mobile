@@ -11,7 +11,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert,
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
-import { fintechAPI } from "@/api";
+import { olivAPI } from "@/api";
 import { fmtMoney } from "@/utils/format";
 import { Banknote, Clock, TrendingUp, ChevronRight } from "lucide-react-native";
 
@@ -48,8 +48,13 @@ export function FactoringCashOutWidget({
 
     setLoading(true);
     try {
-      // This calls the factoring/inquire endpoint which checks all eligible invoices
-      const { data } = await fintechAPI.marketplaceOffers();
+      // Calls the real Oliv initiate-factoring endpoint, which checks the
+      // eligible invoices and submits the cash-out request.
+      const { data } = await olivAPI.initiateFactoring({
+        amount: netPayout,
+        feeRate,
+        invoiceCount,
+      });
       if (data.success) {
         Alert.alert(
           "Payout Requested",

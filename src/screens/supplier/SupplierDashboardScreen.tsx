@@ -21,6 +21,7 @@ import {
 } from "lucide-react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { supplierAPI, olivAPI } from "@/api";
+import { FactoringCashOutWidget } from "@/components/FactoringCashOutWidget";
 import { useAuthStore } from "@/store/auth";
 import { greeting, orderStatusColor, orderStatusLabel, fmtMoney, fmtDate } from "@/utils/format";
 import type { SupplierKpis, RecentOrder, RecentGrn } from "@/types";
@@ -196,6 +197,16 @@ export default function SupplierDashboardScreen({ navigation }: any) {
 
       {/* ─── 48h Factoring Status Card ─── */}
       <FactoringCard oliv={oliv} navigation={navigation} />
+
+      {/* ─── One-tap 48h Cash-Out (only when facility is ACTIVE) ─── */}
+      {factoringActive && fundsAvailable != null ? (
+        <FactoringCashOutWidget
+          availableBalance={fundsAvailable}
+          invoiceCount={data.kpis.approvedOrders + data.kpis.inTransitOrders}
+          feeRate={2.1}
+          onSuccess={fetchData}
+        />
+      ) : null}
 
       {/* ─── Quick Actions ─── */}
       <View style={styles.sectionHeader}>
