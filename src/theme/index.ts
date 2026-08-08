@@ -22,6 +22,10 @@ export const colors = {
   bgInput: "rgba(148,163,184,0.08)",
   bgModal: "rgba(10,14,26,0.95)",
 
+  // Light-mode inverse — used for root/chrome when light scheme is active
+  bgLight: "#F8FAFC",
+  textLight: "#0F172A",
+
   // Borders
   border: "rgba(255,255,255,0.08)",
   borderLight: "rgba(255,255,255,0.12)",

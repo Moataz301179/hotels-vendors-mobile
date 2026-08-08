@@ -187,9 +187,10 @@ Then update `InvoiceUploadScreen.tsx` to use a proper import instead of `require
 ## P3 — Low (polish & infrastructure)
 
 ### P3-1. Add splash screen to app.json
+**Done:** ✅ Implemented — added `splash` block to `app.json` referencing `./assets/splash-icon.png` (1024×1024), `resizeMode: "contain"`, `backgroundColor: "#0A0E1A"` (brand dark).
 ```json
 "splash": {
-  "image": "./assets/splash.png",
+  "image": "./assets/splash-icon.png",
   "resizeMode": "contain",
   "backgroundColor": "#0A0E1A"
 }
@@ -198,37 +199,38 @@ Then update `InvoiceUploadScreen.tsx` to use a proper import instead of `require
 ---
 
 ### P3-2. Add dark mode / light mode toggle
-Respect `useWindowDimensions` or system preference instead of hardcoding `userInterfaceStyle: "dark"`.
+**Done:** ✅ Implemented — removed the hardcoded `userInterfaceStyle: "dark"` (now `"automatic"` so native respects the OS theme). Added a persisted `colorMode` store (`light`/`dark`/`system`) in `src/store/settings.ts`, a `useTheme()` hook (`src/hooks/useTheme.ts`) that resolves the effective scheme via `Appearance`, wired `App.tsx` to drive `StatusBar` style + root background from the active scheme, and added an Appearance toggle (System / Light / Dark) to `ProfileScreen.tsx`.
+> Note: the current color palette is dark-themed; a full light-mode palette (per-screen) is a follow-up task. The toggle is functional for native chrome + StatusBar + preference persistence.
 
 ---
 
 ### P3-3. Configure deep linking
-Add `linking` config to `app.json` so push notifications and emails can navigate to specific orders/invoices.
+**Done:** ✅ Already implemented — `linking` config with `invo://` prefix and `OrderDetail`/`InvoiceDetail`/`PaymentScreen`/`NotificationCenter` screen routes exists in `app.json`.
 
 ---
 
 ### P3-4. Enable Android predictive back gesture
-Set `"predictiveBackGestureEnabled": true` (Android 14+).
+**Done:** ✅ Already implemented — `predictiveBackGestureEnabled: true` is set under `android` in `app.json`.
 
 ---
 
 ### P3-5. Add offline data caching
-Cache catalog and order data locally using `@react-native-async-storage/async-storage` so the app shows data before the API call completes.
+**Status:** ⏳ Pending — requires `@react-native-async-storage/async-storage` catalog/order caching in `hotelAPI`/`supplierAPI` and hydrating stores before network. Out of scope for this pass.
 
 ---
 
 ### P3-6. Add bulk order operations for suppliers
-Backend has `/orders/bulk` — add bulk approve/reject to SupplierOrdersScreen.
+**Status:** ⏳ Pending — backend `/orders/bulk` exists; needs bulk approve/reject UI in `SupplierOrdersScreen.tsx`. Out of scope for this pass.
 
 ---
 
 ### P3-7. Add analytics/insights dashboard
-Beyond basic KPI cards, add a chart view showing revenue trends, order volume, and supplier performance metrics.
+**Status:** ⏳ Pending — requires charting integration for revenue/order-volume/supplier-performance views. Out of scope for this pass.
 
 ---
 
 ### P3-8. Add supplier catalog product detail/edit view
-Currently `SupplierCatalogScreen` only navigates to `console.log("Product detail: ...")`. Add a proper product detail screen with edit capability.
+**Status:** ⏳ Pending — `SupplierCatalogScreen` product navigation is still a stub. Needs a dedicated product detail/edit screen. Out of scope for this pass.
 
 ---
 

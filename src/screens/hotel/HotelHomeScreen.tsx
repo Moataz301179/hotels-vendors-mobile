@@ -10,6 +10,7 @@ import { ShoppingBasket, ClipboardList, FileText } from "lucide-react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
 import { hotelAPI } from "@/api";
+import { CategoryGridSection } from "@/components/CategoryGrid";
 
 export default function HotelHomeScreen({ navigation }: any) {
   const { user, logout } = useAuthStore();
@@ -67,6 +68,11 @@ export default function HotelHomeScreen({ navigation }: any) {
           <Text style={styles.actionArrow}>›</Text>
         </TouchableOpacity>
       ))}
+
+      <CategoryGridSection
+        title="Browse by Category"
+        onCategoryPress={(category) => navigation.navigate("CatalogTab", { category: category.slug })}
+      />
     </ScrollView>
   );
 }

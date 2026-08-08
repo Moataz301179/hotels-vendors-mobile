@@ -15,6 +15,8 @@ import {
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { useAuthStore } from "@/store/auth";
 import { useNotificationStore } from "@/store/notifications";
+import { useSettingsStore } from "@/store/settings";
+import { useTheme } from "@/hooks/useTheme";
 import { initializeNotifications } from "@/services/notifications";
 import { colors } from "@/theme";
 import SplashScreen from "@/screens/onboarding/SplashScreen";
@@ -29,6 +31,8 @@ type Phase = "splash" | "onboarding" | "app";
 export default function App() {
   const { restoreSession } = useAuthStore();
   const { loadFromStorage } = useNotificationStore();
+  const hydrateSettings = useSettingsStore((s) => s.hydrate);
+  const { isDark } = useTheme();
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_600SemiBold,
@@ -39,10 +43,11 @@ export default function App() {
   useEffect(() => {
     restoreSession();
     loadFromStorage();
+    hydrateSettings();
     if (phase === "app") {
       initializeNotifications();
     }
-  }, [restoreSession, loadFromStorage, phase]);
+  }, [restoreSession, loadFromStorage, hydrateSettings, phase]);
 
   const handleSplashDone = useCallback(async () => {
     const seen = await hasOnboarded();
@@ -62,19 +67,26 @@ export default function App() {
     );
   }
 
+  const rootBg = isDark ? colors.bg : colors.bgLight;
+  const statusBarStyle = isDark ? "light" : "dark";
+
   if (phase === "onboarding") {
     return (
       <SafeAreaProvider>
-        <StatusBar style="light" />
-        <OnboardingScreen onDone={handleOnboardingDone} />
+        <StatusBar style={statusBarStyle} />
+        <View style={{ flex: 1, backgroundColor: rootBg }}>
+          <OnboardingScreen onDone={handleOnboardingDone} />
+        </View>
       </SafeAreaProvider>
     );
   }
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
-      <AppNavigator />
+      <StatusBar style={statusBarStyle} />
+      <View style={{ flex: 1, backgroundColor: rootBg }}>
+        <AppNavigator />
+      </View>
     </SafeAreaProvider>
   );
 }

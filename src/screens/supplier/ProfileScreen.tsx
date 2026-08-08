@@ -8,10 +8,12 @@ import {
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
+import { useSettingsStore } from "@/store/settings";
+import { useTheme } from "@/hooks/useTheme";
 import { orderStatusLabel } from "@/utils/format";
 import {
   User, Phone, Mail, Building, MapPin, FileText, Shield, Bell, Key, LogOut,
-  ChevronRight, Star,
+  ChevronRight, Star, Sun, Moon, Monitor,
 } from "lucide-react-native";
 
 function Field({ label, value, icon }: { label: string; value?: string | null; icon?: React.ReactNode }) {
@@ -27,12 +29,50 @@ function Field({ label, value, icon }: { label: string; value?: string | null; i
   );
 }
 
+interface ThemeModeButtonProps {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  isDark: boolean;
+}
+
+function ThemeModeButton({ icon, label, active, onPress, isDark }: ThemeModeButtonProps) {
+  const tint = active ? colors.primary : colors.textMuted;
+  return (
+    <TouchableOpacity
+      style={[
+        styles.modeButton,
+        {
+          backgroundColor: active
+            ? isDark
+              ? colors.primaryMuted
+              : "rgba(49,46,129,0.08)"
+            : isDark
+              ? colors.bgCard
+              : "rgba(148,163,184,0.05)",
+          borderColor: active ? colors.primary : colors.borderLight,
+        },
+      ]}
+      onPress={onPress}
+    >
+      {icon}
+      <Text style={[styles.modeButtonLabel, { color: tint }]}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const [pushEnabled, setPushEnabled] = useState(true);
   const [smsEnabled, setSmsEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(true);
+
+  const colorMode = useSettingsStore((s) => s.colorMode);
+  const setColorMode = useSettingsStore((s) => s.setColorMode);
+  const { isDark } = useTheme();
+  const rootBg = isDark ? colors.bg : colors.bgLight;
 
   const handleLogout = () => {
     Alert.alert("Sign out", "Are you sure you want to sign out?", [
@@ -100,6 +140,34 @@ export default function ProfileScreen() {
         </View>
       </View>
 
+      <Text style={styles.sectionTitle}>Appearance</Text>
+      <View style={[styles.card, { backgroundColor: rootBg }]}>
+        <Text style={[styles.switchLabel, { color: colors.textSecondary, marginBottom: spacing.sm }]}>App theme</Text>
+        <View style={[styles.switchRow, { borderBottomWidth: 0 }]}>
+          <ThemeModeButton
+            icon={<Monitor size={18} color={colorMode === "system" ? colors.bg : colors.textMuted} />}
+            label="System"
+            active={colorMode === "system"}
+            onPress={() => setColorMode("system")}
+            isDark={isDark}
+          />
+          <ThemeModeButton
+            icon={<Sun size={18} color={colorMode === "light" ? colors.bg : colors.textMuted} />}
+            label="Light"
+            active={colorMode === "light"}
+            onPress={() => setColorMode("light")}
+            isDark={isDark}
+          />
+          <ThemeModeButton
+            icon={<Moon size={18} color={colorMode === "dark" ? colors.bg : colors.textMuted} />}
+            label="Dark"
+            active={colorMode === "dark"}
+            onPress={() => setColorMode("dark")}
+            isDark={isDark}
+          />
+        </View>
+      </View>
+
       <Text style={styles.sectionTitle}>Security</Text>
       <TouchableOpacity style={styles.card} onPress={() => Alert.alert("Change password", "Coming in the next build")}>
         <View style={styles.rowBetween}>
@@ -148,6 +216,8 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   switchLeft: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   switchLabel: { ...typography.body, color: colors.text },
+  modeButton: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.sm, paddingVertical: spacing.sm, borderRadius: radii.md, borderWidth: 1 },
+  modeButtonLabel: { ...typography.bodySmall, fontWeight: "600" },
   rowBetween: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   linkText: { ...typography.body, color: colors.primary },
   logoutBtn: { backgroundColor: colors.error + "22", borderWidth: 1, borderColor: colors.error + "66", borderRadius: radii.md, padding: spacing.lg, alignItems: "center", marginTop: spacing.lg },

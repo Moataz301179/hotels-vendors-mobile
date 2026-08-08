@@ -60,6 +60,7 @@ import PODScreen from "@/screens/shipping/PODScreen";
 
 // Onboarding
 import OnboardingProgressScreen from "@/screens/OnboardingProgressScreen";
+import CategoryGridDemoScreen from "@/screens/CategoryGridDemoScreen";
 
 const Stack = createNativeStackNavigator();
 const FinanceStackNav = createNativeStackNavigator();
@@ -291,7 +292,8 @@ export default function AppNavigator() {
              <Stack.Screen name="HotelFinancing" component={HotelFinancingScreen} options={{ title: "Financing" }} />
              <Stack.Screen name="ScheduledOrders" component={ScheduledOrdersScreen} options={{ title: "Scheduled Orders" }} />
              <Stack.Screen name="InventoryBalance" component={InventoryBalanceScreen} options={{ title: "Inventory Balance" }} />
-           </>
+                           <Stack.Screen name="CategoryGridDemo" component={CategoryGridDemoScreen} options={{ title: "Categories" }} />
+                         </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
