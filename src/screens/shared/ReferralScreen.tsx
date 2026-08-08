@@ -5,7 +5,8 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Share, Clipboard, Alert, Linking } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Share, Alert, Linking } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import { Users, Copy, MessageCircle, CheckCircle2, Gift, Factory, Hotel, Zap, ArrowRight } from "lucide-react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
@@ -57,8 +58,8 @@ export default function ReferralScreen() {
     } catch {}
   };
 
-  const handleCopyLink = () => {
-    Clipboard.setString(referralLink);
+  const handleCopyLink = async () => {
+    await Clipboard.setStringAsync(referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     Alert.alert("Copied", "Referral link copied to clipboard");
