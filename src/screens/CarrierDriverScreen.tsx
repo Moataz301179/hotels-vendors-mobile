@@ -152,7 +152,7 @@ export function CarrierDriverScreen({
             {/* Addresses */}
             <View style={styles.addresses}>
               <View style={styles.addressRow}>
-                <MapPin size={14} color="#2563eb" />
+                <MapPin size={14} color="#ABA294" />
                 <Text style={styles.addressText} numberOfLines={1}>{activeJob.pickupAddress}</Text>
               </View>
               <View style={styles.addressRow}>
@@ -255,10 +255,10 @@ const styles = StyleSheet.create({
     width: 12, height: 12, borderRadius: 6,
     backgroundColor: "rgba(255,255,255,0.1)", borderWidth: 2, borderColor: "rgba(255,255,255,0.15)",
   },
-  stepDone: { backgroundColor: "#2563eb", borderColor: "#2563eb" },
-  stepActive: { width: 14, height: 14, borderColor: "#2563eb", backgroundColor: colors.bg, borderWidth: 3 },
+  stepDone: { backgroundColor: "#ABA294", borderColor: "#ABA294" },
+  stepActive: { width: 14, height: 14, borderColor: "#ABA294", backgroundColor: colors.bg, borderWidth: 3 },
   stepLine: { width: "100%", height: 2, backgroundColor: "rgba(255,255,255,0.08)", position: "absolute", top: 5, left: "50%" },
-  stepLineDone: { backgroundColor: "#2563eb" },
+  stepLineDone: { backgroundColor: "#ABA294" },
   stepLabel: { ...typography.caption, color: colors.textMuted, fontSize: 9, marginTop: 4, textAlign: "center" },
   addresses: { gap: spacing.sm, marginBottom: spacing.sm },
   addressRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   eWaybillText: { ...typography.caption, color: colors.textMuted },
   advanceBtn: {
     padding: spacing.md, borderRadius: radii.lg,
-    backgroundColor: "#2563eb", alignItems: "center",
+    backgroundColor: "#ABA294", alignItems: "center",
   },
   advanceBtnText: { ...typography.body, color: "#fff", fontWeight: "700" },
   queue: { gap: spacing.sm },
