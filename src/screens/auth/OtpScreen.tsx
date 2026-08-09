@@ -19,6 +19,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { colors, spacing, radii, typography } from "@/theme";
@@ -114,7 +115,11 @@ export default function OtpScreen() {
     >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.logo}>HOVIN</Text>
+          <Image
+            source={require("../../../assets/brand/hovin-logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={styles.title}>Verify your number</Text>
           <Text style={styles.subtext}>
             Enter the 6-digit code we sent to{`\n`}
@@ -166,7 +171,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flexGrow: 1, justifyContent: "center", padding: spacing.xl },
   header: { alignItems: "center", marginBottom: spacing.xxxl },
-  logo: { ...typography.h1, color: colors.primary, fontSize: 28, letterSpacing: 6, marginBottom: spacing.lg },
+  logo: { width: 150, aspectRatio: 769 / 415, resizeMode: "contain", marginBottom: spacing.xl },
   title: { ...typography.h2, color: colors.text, textAlign: "center" },
   subtext: { ...typography.body, color: colors.textSecondary, textAlign: "center", marginTop: spacing.sm, lineHeight: 22 },
   phone: { color: colors.primary, fontWeight: "600" },

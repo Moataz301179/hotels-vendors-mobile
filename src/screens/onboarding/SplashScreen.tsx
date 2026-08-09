@@ -4,13 +4,12 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
   withTiming,
-  withSequence,
   Easing,
 } from "react-native-reanimated";
 import { colors, typography, spacing, radii } from "@/theme";
@@ -25,19 +24,11 @@ const INIT_STEPS = [
 const STEP_MS = 700;
 
 export default function SplashScreen({ onDone }: { onDone: () => void }) {
-  const rotY = useSharedValue(0);
-  const rotX = useSharedValue(-14);
   const glow = useSharedValue(0.35);
   const [step, setStep] = useState(0);
   const [pct, setPct] = useState(0);
 
   useEffect(() => {
-    rotY.value = withRepeat(withTiming(360, { duration: 2600, easing: Easing.linear }), -1);
-    rotX.value = withSequence(
-      withTiming(14, { duration: 1400, easing: Easing.inOut(Easing.sin) }),
-      withTiming(-14, { duration: 1800, easing: Easing.inOut(Easing.sin) }),
-      withTiming(0, { duration: 900, easing: Easing.inOut(Easing.sin) })
-    );
     glow.value = withRepeat(withTiming(0.85, { duration: 1300, easing: Easing.inOut(Easing.sin) }), -1, true);
   }, []);
 
@@ -55,24 +46,17 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
     return () => clearInterval(iv);
   }, [onDone]);
 
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [
-      { perspective: 900 },
-      { rotateY: `${rotY.value}deg` },
-      { rotateX: `${rotX.value}deg` },
-    ],
-  }));
-
   const glowStyle = useAnimatedStyle(() => ({ opacity: glow.value }));
 
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.glow, glowStyle]} />
-      <Animated.View style={[styles.card, cardStyle]}>
-        <Text style={styles.mono}>I</Text>
-      </Animated.View>
 
-      <Text style={styles.wordmark}>HOVIN</Text>
+      <Image
+        source={require("../../../assets/brand/hovin-logo.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.subline}>Digital Procurement Hub</Text>
       <Text style={styles.byline}>A Hotels Vendors application</Text>
 
@@ -100,26 +84,15 @@ const styles = StyleSheet.create({
     width: 320,
     height: 320,
     borderRadius: 999,
-    backgroundColor: "rgba(212,175,55,0.10)",
-    top: "28%",
+    backgroundColor: "rgba(171,162,148,0.14)",
+    top: "26%",
   },
-  card: {
-    width: 104,
-    height: 104,
-    borderRadius: 28,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.55)",
-    shadowColor: "#D4AF37",
-    shadowOpacity: 0.35,
-    shadowRadius: 28,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 12,
+  logo: {
+    width: 170,
+    aspectRatio: 769 / 415,
+    resizeMode: "contain",
+    marginBottom: spacing.xxl,
   },
-  mono: { ...typography.h1, color: colors.head, fontSize: 52, fontFamily: "PlusJakartaSans_600SemiBold" },
-  wordmark: { ...typography.h1, color: colors.text, marginTop: spacing.xxl, letterSpacing: 6 },
   subline: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
   byline: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, letterSpacing: 0.4 },
   stepRow: {

@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { isValidEgyptianPhone, normalizePhone } from "@/utils/phone";
@@ -32,7 +33,11 @@ export default function OtpLoginScreen({ navigation }: any) {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.logo}>HOVIN</Text>
+          <Image
+            source={require("../../../assets/brand/hovin-logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={styles.title}>Sign in with mobile</Text>
           <Text style={styles.subtext}>
             We'll text you a 6-digit code. Your number must be registered to the
@@ -61,7 +66,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flexGrow: 1, justifyContent: "center", padding: spacing.xl },
   header: { alignItems: "center", marginBottom: spacing.xxxl },
-  logo: { ...typography.h1, color: colors.primary, fontSize: 28, letterSpacing: 6, marginBottom: spacing.lg },
+  logo: { width: 150, aspectRatio: 769 / 415, resizeMode: "contain", marginBottom: spacing.xl },
   title: { ...typography.h2, color: colors.text, textAlign: "center" },
   subtext: { ...typography.body, color: colors.textSecondary, textAlign: "center", marginTop: spacing.sm, lineHeight: 22 },
   form: { gap: spacing.md },

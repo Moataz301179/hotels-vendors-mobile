@@ -32,7 +32,11 @@ export default function LoginScreen({ navigation }: any) {
       <View style={styles.bgOverlay} />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.logo}>HOVIN</Text>
+          <Image
+            source={require("../../../assets/brand/hovin-logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={styles.tagline}>Digital Procurement Hub</Text>
           <Text style={styles.byline}>A Hotels Vendors application</Text>
         </View>
@@ -88,10 +92,10 @@ export default function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   bgImage: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
-  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(10,14,26,0.88)" },
+  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(49,75,67,0.78)" },
   scroll: { flexGrow: 1, justifyContent: "center", padding: spacing.xl },
   header: { alignItems: "center", marginBottom: spacing.xxxl },
-  logo: { ...typography.h1, color: colors.primary, fontSize: 32, letterSpacing: 6 },
+  logo: { width: 168, aspectRatio: 769 / 415, resizeMode: "contain", marginBottom: spacing.lg },
   tagline: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
   byline: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, letterSpacing: 0.4 },
   form: { gap: spacing.md },
