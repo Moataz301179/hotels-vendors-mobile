@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     elevation: 12,
   },
-  mono: { ...typography.h1, color: "#0A0E1A", fontSize: 52, fontFamily: "PlusJakartaSans_600SemiBold" },
+  mono: { ...typography.h1, color: colors.head, fontSize: 52, fontFamily: "PlusJakartaSans_600SemiBold" },
   wordmark: { ...typography.h1, color: colors.text, marginTop: spacing.xxl, letterSpacing: 6 },
   subline: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
   byline: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, letterSpacing: 0.4 },

@@ -120,7 +120,7 @@ export const HOTEL_CATEGORIES: HotelCategory[] = [
     labelAr: "تكنولوجيا المعلومات",
     description: "TVs, WiFi equipment, POS systems, key card systems, cabling, hotel tech",
     icon: "Monitor",
-    color: "#6366F1",
+    color: "#314B43",
     examples: ["Smart TVs", "WiFi Access Points", "POS Terminals", "Key Card Encoders"],
     keywords: ["it", "tech", "computer", "tv", "wifi", "network", "pos", "software"],
   },

@@ -1,32 +1,32 @@
 /**
- * HOVIN Mobile — Design Tokens (Corporate Indigo)
- * Dark blue-black background, white text, indigo accent (#312E81).
+ * HOVIN Mobile — Design Tokens (Brand Green / Beige)
+ * Dark green-black background, white text, brand green accent (#314B43).
  * Semantic status colors (green/amber/red) used for order states only.
  */
 
 export const colors = {
-  // Brand accent (deep indigo, AA on dark surfaces)
-  primary: "#312E81",
-  primaryDark: "#1E1B4B",
-  primaryMuted: "rgba(49,46,129,0.14)",
+  // Brand accent (deep HOVIN green, AA on dark surfaces)
+  primary: "#314B43",
+  primaryDark: "#24382E",
+  primaryMuted: "rgba(49,75,67,0.14)",
 
-  // Accent (royal blue)
-  accent: "#6366F1",
-  accentLight: "#818CF8",
-  accentMuted: "rgba(99,102,241,0.14)",
+  // Accent (beige secondary)
+  accent: "#ABA294",
+  accentLight: "#C7BFB1",
+  accentMuted: "rgba(171,162,148,0.14)",
 
-  // Background layers (dark blue-black, slate-tinted)
+  // Background layers (dark green-black, green-tinted)
   bg: "#0A0E1A",
-  bgCard: "rgba(148,163,184,0.06)",
-  bgCardHover: "rgba(148,163,184,0.10)",
-  bgInput: "rgba(148,163,184,0.08)",
+  bgCard: "rgba(49,75,67,0.06)",
+  bgCardHover: "rgba(49,75,67,0.10)",
+  bgInput: "rgba(49,75,67,0.08)",
   bgModal: "rgba(10,14,26,0.95)",
 
   // Light-mode inverse — used for root/chrome when light scheme is active
   bgLight: "#F8FAFC",
   textLight: "#0F172A",
 
-  // Borders
+  // Borders (neutral white-alpha / grey family)
   border: "rgba(255,255,255,0.08)",
   borderLight: "rgba(255,255,255,0.12)",
 
@@ -34,6 +34,9 @@ export const colors = {
   text: "#F2F4F8",
   textSecondary: "rgba(242,244,248,0.72)",
   textMuted: "rgba(242,244,248,0.48)",
+
+  // Heading text color (brand head grey) — text over light/glass surfaces
+  head: "#4D4A46",
 
   // Status (semantic only, never brand)
   success: "#059669",
@@ -49,7 +52,7 @@ export const colors = {
 
   // Tab bar
   tabBg: "rgba(10,14,26,0.9)",
-  tabBorder: "rgba(148,163,184,0.08)",
+  tabBorder: "rgba(49,75,67,0.08)",
 } as const;
 
 export const spacing = {

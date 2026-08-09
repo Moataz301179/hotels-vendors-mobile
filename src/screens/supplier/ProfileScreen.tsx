@@ -47,10 +47,10 @@ function ThemeModeButton({ icon, label, active, onPress, isDark }: ThemeModeButt
           backgroundColor: active
             ? isDark
               ? colors.primaryMuted
-              : "rgba(49,46,129,0.08)"
+              : "rgba(49,75,67,0.08)"
             : isDark
               ? colors.bgCard
-              : "rgba(148,163,184,0.05)",
+              : "rgba(49,75,67,0.05)",
           borderColor: active ? colors.primary : colors.borderLight,
         },
       ]}
