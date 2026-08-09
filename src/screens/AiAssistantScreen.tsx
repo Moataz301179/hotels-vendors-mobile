@@ -146,7 +146,7 @@ export default function AiAssistantScreen({ navigation }: any) {
   const welcomeMessage: ChatMessage = {
     id: "welcome",
     role: "assistant",
-    content: `Hello${user?.name ? `, ${user.name.split(" ")[0]}` : ""}! I'm your INVO AI assistant. I can help with procurement insights, order optimization, and spend analysis. What would you like to discuss?`,
+    content: `Hello${user?.name ? `, ${user.name.split(" ")[0]}` : ""}! I'm your HOVIN AI assistant. I can help with procurement insights, order optimization, and spend analysis. What would you like to discuss?`,
   };
 
   const showWelcome = messages.length === 0;

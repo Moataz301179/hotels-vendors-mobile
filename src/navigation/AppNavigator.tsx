@@ -97,7 +97,7 @@ function HotelTabs() {
     >
       <Tab.Screen
         name="Home" component={HotelHomeScreen}
-        options={{ title: "INVO", tabBarLabel: "Home", tabBarIcon: ({ color, size }) => <Home size={size} color={color} /> }}
+        options={{ title: "HOVIN", tabBarLabel: "Home", tabBarIcon: ({ color, size }) => <Home size={size} color={color} /> }}
       />
       <Tab.Screen
         name="CatalogTab" component={CatalogScreen}

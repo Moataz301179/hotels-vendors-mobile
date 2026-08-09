@@ -1,5 +1,5 @@
 /**
- * ePOD Scanner — INVO Mobile
+ * ePOD Scanner — HOVIN Mobile
  * Hotel dock barcode/QR scanner for Goods Received verification
  *
  * Uses expo-camera/bar-code-scanner to scan delivery packages.

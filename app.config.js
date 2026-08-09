@@ -2,7 +2,7 @@ module.exports = ({ config }) => ({
   ...config,
   expo: {
     owner: "hotelsvendors.com",
-    name: "INVO",
+    name: "HOVIN",
     slug: "invo",
     version: "1.0.0",
     orientation: "portrait",
@@ -19,10 +19,10 @@ module.exports = ({ config }) => ({
       bundleIdentifier: "com.hotelsvendors.invo",
       associatedDomains: ["applinks:hotelsvendors.com"],
       infoPlist: {
-        NSCameraUsageDescription: "INVO needs camera access to photograph invoices for financing.",
-        NSPhotoLibraryUsageDescription: "INVO needs photo library access to select invoice images.",
-        NSUserNotificationUsageDescription: "INVO needs permission to send you order and payment updates.",
-        NSAppleEventsUsageDescription: "INVO needs permission to handle payment callback links.",
+        NSCameraUsageDescription: "HOVIN needs camera access to photograph invoices for financing.",
+        NSPhotoLibraryUsageDescription: "HOVIN needs photo library access to select invoice images.",
+        NSUserNotificationUsageDescription: "HOVIN needs permission to send you order and payment updates.",
+        NSAppleEventsUsageDescription: "HOVIN needs permission to handle payment callback links.",
         ITSAppUsesNonExemptEncryption: false,
         // Oliv + ETA deep link schemes
         CFBundleURLTypes: [

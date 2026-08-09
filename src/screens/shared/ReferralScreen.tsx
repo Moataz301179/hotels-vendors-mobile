@@ -18,7 +18,7 @@ export default function ReferralScreen() {
   const [copied, setCopied] = useState(false);
 
   // Build the referral link with the user's tenant/code
-  const referralCode = user?.tenantId || user?.id || "INVO";
+  const referralCode = user?.tenantId || user?.id || "HOVIN";
   const referralLink = `https://www.hotelsvendors.com/register?ref=${referralCode}`;
 
   const userRole = user?.role || "SUPPLIER";
@@ -39,7 +39,7 @@ export default function ReferralScreen() {
 
   const shareMessage = isHotel
     ? `I'm using HotelsVendors to manage our hotel procurement — join as a supplier to receive direct orders from us. 48h cash-out available. Register here: ${referralLink}`
-    : `I supply hotels through HotelsVendors INVO app — join as a hotel buyer to get competitive pricing from verified suppliers. Register here: ${referralLink}`;
+    : `I supply hotels through HotelsVendors HOVIN app — join as a hotel buyer to get competitive pricing from verified suppliers. Register here: ${referralLink}`;
 
   const handleWhatsAppShare = async () => {
     const url = `${WHATSAPP_URL}${encodeURIComponent(shareMessage)}`;

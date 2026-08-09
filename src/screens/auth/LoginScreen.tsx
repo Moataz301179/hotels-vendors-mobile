@@ -32,7 +32,7 @@ export default function LoginScreen({ navigation }: any) {
       <View style={styles.bgOverlay} />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.logo}>INVO</Text>
+          <Text style={styles.logo}>HOVIN</Text>
           <Text style={styles.tagline}>Digital Procurement Hub</Text>
           <Text style={styles.byline}>A Hotels Vendors application</Text>
         </View>

@@ -181,7 +181,7 @@ export default function ProfileScreen() {
 
       <Text style={styles.sectionTitle}>About</Text>
       <View style={styles.card}>
-        <Field label="App" value="INVO Vendor" />
+        <Field label="App" value="HOVIN Vendor" />
         <Field label="Version" value="1.0.0" />
       </View>
 

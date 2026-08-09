@@ -1,5 +1,5 @@
 /**
- * Invo Mobile — Design Tokens (Corporate Indigo)
+ * HOVIN Mobile — Design Tokens (Corporate Indigo)
  * Dark blue-black background, white text, indigo accent (#312E81).
  * Semantic status colors (green/amber/red) used for order states only.
  */

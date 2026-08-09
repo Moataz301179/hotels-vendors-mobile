@@ -1,6 +1,6 @@
 /**
  * withRoleGuard — Mobile Role-Based Access Control
- * INVO Mobile App
+ * HOVIN Mobile App
  *
  * Wraps any screen component to enforce role-based access.
  * Redirects unauthorized users to their role's home screen.

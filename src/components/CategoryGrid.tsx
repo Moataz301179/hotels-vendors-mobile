@@ -1,5 +1,5 @@
 /**
- * CategoryGrid — INVO Mobile
+ * CategoryGrid — HOVIN Mobile
  * Displays hotel procurement categories matching web's canonical taxonomy.
  * Single source of truth: @/categories/index.ts
  */

@@ -1,5 +1,5 @@
 /**
- * StockToggle — INVO Mobile
+ * StockToggle — HOVIN Mobile
  * Fast stock status toggle for supplier inventory
  *
  * One-tap switch between In Stock / Out of Stock.

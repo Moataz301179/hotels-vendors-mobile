@@ -1,5 +1,5 @@
 /**
- * Shared Marketplace Categories — INVO Mobile
+ * Shared Marketplace Categories — HOVIN Mobile
  *
  * SYNCHRONIZED with web's lib/marketplace/categories.ts.
  * THIS IS THE SINGLE SOURCE OF TRUTH for product categorization on mobile.

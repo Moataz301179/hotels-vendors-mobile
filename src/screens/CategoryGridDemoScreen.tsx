@@ -1,5 +1,5 @@
 /**
- * CategoryGrid Demo Screen — Invo Mobile
+ * CategoryGrid Demo Screen — HOVIN Mobile
  * Showcase the CategoryGrid component
  */
 

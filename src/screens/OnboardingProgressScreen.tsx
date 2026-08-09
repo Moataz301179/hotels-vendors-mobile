@@ -143,7 +143,7 @@ export default function OnboardingProgressScreen({ navigation }: any) {
           <View style={[styles.roleIcon, { backgroundColor: colors.primary }]}>
             <RoleIcon size={24} color="#fff" />
           </View>
-          <Text style={styles.title}>Welcome to INVO</Text>
+          <Text style={styles.title}>Welcome to HOVIN</Text>
           <Text style={styles.subtitle}>Complete these steps to unlock the full experience</Text>
         </View>
 

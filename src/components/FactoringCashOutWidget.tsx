@@ -1,5 +1,5 @@
 /**
- * FactoringCashOutWidget — INVO Mobile
+ * FactoringCashOutWidget — HOVIN Mobile
  * One-tap "Request 48h Payout" for suppliers
  *
  * Shows available invoice balance, calculated factoring fee (1.5–3%),

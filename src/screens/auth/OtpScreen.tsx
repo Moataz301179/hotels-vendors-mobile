@@ -114,7 +114,7 @@ export default function OtpScreen() {
     >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.logo}>INVO</Text>
+          <Text style={styles.logo}>HOVIN</Text>
           <Text style={styles.title}>Verify your number</Text>
           <Text style={styles.subtext}>
             Enter the 6-digit code we sent to{`\n`}

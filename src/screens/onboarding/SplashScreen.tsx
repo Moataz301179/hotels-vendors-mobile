@@ -1,6 +1,6 @@
 /**
  * Splash Screen — animated 3D-feel monogram + initialization steps
- * Dribbble-style dark institutional loading intro (Invo identity).
+ * Dribbble-style dark institutional loading intro (HOVIN identity).
  */
 
 import React, { useEffect, useState } from "react";
@@ -72,7 +72,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         <Text style={styles.mono}>I</Text>
       </Animated.View>
 
-      <Text style={styles.wordmark}>INVO</Text>
+      <Text style={styles.wordmark}>HOVIN</Text>
       <Text style={styles.subline}>Digital Procurement Hub</Text>
       <Text style={styles.byline}>A Hotels Vendors application</Text>
 
