@@ -90,11 +90,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 170,
-    height: 92, // explicit height — the source PNG is 2000×2000 square;
-                // forcing a fixed box guarantees it can never render at 2-screen scale
+    aspectRatio: 769 / 415, // explicit width + proportional ratio + contain — NEVER hardcode height
     resizeMode: "contain",
     marginBottom: spacing.xxl,
-    overflow: "hidden",
   },
   subline: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
   byline: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, letterSpacing: 0.4 },
