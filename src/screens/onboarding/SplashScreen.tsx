@@ -82,11 +82,11 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: "absolute",
-    width: 280,
-    height: 280,
+    width: 220,
+    height: 220,
     borderRadius: 999,
-    backgroundColor: "rgba(171,162,148,0.14)",
-    top: "24%",
+    backgroundColor: "rgba(171,162,148,0.08)", // subtle halo behind logo — must never read as a huge disc
+    top: "26%",
   },
   logo: {
     width: 170,
