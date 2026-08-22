@@ -92,6 +92,9 @@ export async function initializeNotifications() {
     await registerPushToken();
   }
 
+  // Pull in-app notifications from the backend (order events, etc.)
+  await useNotificationStore.getState().syncFromServer();
+
   const response = await Notifications.getLastNotificationResponseAsync();
   if (response) {
     handleIncomingNotification(response);

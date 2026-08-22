@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
+import { Panel, Plate, Led, MechButton, MONO } from "@/components/ops";
 
 export default function LoginScreen({ navigation }: any) {
   const [identifier, setIdentifier] = useState("");
@@ -32,58 +33,61 @@ export default function LoginScreen({ navigation }: any) {
       <View style={styles.bgOverlay} />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Image
-            source={require("../../../assets/brand/hovin-logo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.sm }}>
+            <Led color={colors.gold} />
+            <Text style={styles.logoWord}>HOVIN</Text>
+          </View>
           <Text style={styles.tagline}>Digital Procurement Hub</Text>
           <Text style={styles.byline}>A Hotels Vendors application</Text>
         </View>
 
-        <View style={styles.form}>
-          <Text style={styles.label}>Email or Mobile Number</Text>
-          <TextInput
-            style={styles.input}
-            value={identifier}
-            onChangeText={setIdentifier}
-            placeholder="you@hotel.com or +20 1X0 XXX XXXX"
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="none"
-          />
+                <View style={styles.form}>
+          <Panel tag="AUTH // HOVIN" style={{ padding: spacing.lg }}>
+            <Text style={styles.label}>Email or Mobile Number</Text>
+            <TextInput
+              style={styles.input}
+              value={identifier}
+              onChangeText={setIdentifier}
+              placeholder="you@hotel.com or +20 1X0 XXX XXXX"
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+            />
 
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter password"
-            placeholderTextColor={colors.textMuted}
-            secureTextEntry
-          />
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Enter password"
+              placeholderTextColor={colors.textMuted}
+              secureTextEntry
+            />
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoading}>
             {isLoading ? (
-              <ActivityIndicator color={colors.bg} />
+              <View style={[styles.mechLoading, { backgroundColor: colors.primary }]}>
+                <ActivityIndicator color={colors.bg} />
+              </View>
             ) : (
-              <Text style={styles.buttonText}>Sign In</Text>
+              <MechButton onPress={handleLogin} style={{ marginTop: spacing.md }}>
+                <Text style={styles.buttonText}>SIGN IN</Text>
+              </MechButton>
             )}
-          </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-            <Text style={styles.link}>Don't have an account? Sign Up</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+              <Text style={styles.link}>Don't have an account? Sign Up</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-            <Text style={styles.linkMuted}>Forgot Password?</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+              <Text style={styles.linkMuted}>Forgot Password?</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate("OtpLogin")}>
-            <Text style={styles.linkMuted}>Sign in with mobile & OTP</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("OtpLogin")}>
+              <Text style={styles.linkMuted}>Sign in with mobile & OTP</Text>
+            </TouchableOpacity>
+          </Panel>
         </View>
 
-        <Text style={styles.trust}>Secure sign-in · ETA-compliant invoicing</Text>
+        <Text style={styles.trust}>SECURE SIGN-IN // ETA-COMPLIANT INVOICING</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -92,10 +96,16 @@ export default function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   bgImage: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
-  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(49,75,67,0.78)" },
+  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(11,15,20,0.9)" },
   scroll: { flexGrow: 1, justifyContent: "center", padding: spacing.xl },
-  header: { alignItems: "center", marginBottom: spacing.xxxl },
-  logo: { width: 168, aspectRatio: 769 / 415, resizeMode: "contain", marginBottom: spacing.lg },
+  header: { alignItems: "center", marginBottom: spacing.xxl },
+  logoWord: {
+    fontSize: 30,
+    fontWeight: "800",
+    letterSpacing: 3,
+    color: colors.text,
+    fontFamily: "PlusJakartaSans_700Bold",
+  },
   tagline: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
   byline: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, letterSpacing: 0.4 },
   form: { gap: spacing.md },
@@ -119,5 +129,6 @@ const styles = StyleSheet.create({
   buttonText: { color: colors.bg, fontWeight: "600", fontSize: 16 },
   link: { color: colors.primary, textAlign: "center", marginTop: spacing.lg, ...typography.bodySmall },
   linkMuted: { color: colors.textMuted, textAlign: "center", marginTop: spacing.sm, ...typography.bodySmall },
-  trust: { ...typography.caption, color: colors.textMuted, textAlign: "center", marginTop: spacing.xxl },
+  trust: { ...typography.caption, color: colors.textMuted, textAlign: "center", marginTop: spacing.xxl, fontFamily: MONO as any, letterSpacing: 1 },
+  mechLoading: { borderRadius: radii.sm - 2, padding: spacing.lg, alignItems: "center", marginTop: spacing.md },
 });

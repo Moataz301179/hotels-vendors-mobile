@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -52,12 +52,11 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
     <View style={styles.container}>
       <Animated.View style={[styles.glow, glowStyle]} />
 
-      <Image
-        source={require("../../../assets/brand/hovin-logo.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-      <Text style={styles.subline}>Digital Procurement Hub</Text>
+      <View style={styles.logoWrap}>
+        {/* No logo stamp — clean text-only brand on the loading frame */}
+        <Text style={styles.brandName}>HOVIN</Text>
+        <Text style={styles.logoTagline}>Digital Procurement Hub</Text>
+      </View>
       <Text style={styles.byline}>A Hotels Vendors application</Text>
 
       <View style={styles.stepRow}>
@@ -88,12 +87,18 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(171,162,148,0.08)", // subtle halo behind logo — must never read as a huge disc
     top: "26%",
   },
-  logo: {
-    width: 170,
-    aspectRatio: 769 / 415, // explicit width + proportional ratio + contain — NEVER hardcode height
-    resizeMode: "contain",
+  logoWrap: {
+    alignItems: "center",
     marginBottom: spacing.xxl,
   },
+  brandName: {
+    fontSize: 34,
+    fontWeight: "800",
+    letterSpacing: 3,
+    color: colors.text,
+    fontFamily: "PlusJakartaSans_700Bold",
+  },
+  logoTagline: { ...typography.body, color: colors.textSecondary, marginTop: spacing.md },
   subline: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
   byline: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, letterSpacing: 0.4 },
   stepRow: {

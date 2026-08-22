@@ -23,6 +23,53 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+// Map HTTP status codes to friendly user-facing messages.
+const statusMessages: Record<number, string> = {
+  400: "Something wasn't entered correctly. Please check your details and try again.",
+  401: "Your session has expired. Please sign in again.",
+  403: "You don't have permission to do that.",
+  404: "This couldn't be found. It may have been removed.",
+  409: "This action conflicts with the current state. Please refresh and try again.",
+  422: "Something wasn't entered correctly. Please check your details and try again.",
+  429: "Too many requests. Please wait a moment and try again.",
+  500: "Something went wrong on our side. Please try again in a moment.",
+  502: "Our server is temporarily unavailable. Please try again shortly.",
+  503: "Our service is briefly down for maintenance. Please try again soon.",
+};
+
+// Extract the backend's structured error message when present.
+function backendErrorMessage(error: any): string | null {
+  const data = error?.response?.data;
+  if (!data) return null;
+  if (typeof data.error === "string" && data.error.trim()) return data.error.trim();
+  if (typeof data.message === "string" && data.message.trim()) return data.message.trim();
+  return null;
+}
+
+// Normalize a rejected axios error into one with a friendly user-facing message.
+function friendlyError(error: any): any {
+  if (!error?.response) {
+    // Network / timeout / no response.
+    if (error?.code === "ECONNABORTED") {
+      error.message = "The request took too long. Please check your connection and try again.";
+    } else if (!error?.request) {
+      error.message = error?.message || "Something went wrong. Please try again.";
+    } else {
+      error.message = "Can't reach the server. Please check your internet connection.";
+    }
+    return error;
+  }
+  const status = error.response.status;
+  const backend = backendErrorMessage(error);
+  if (backend && status !== 401 && status !== 403) {
+    // Prefer the backend's specific message (validation, rate-limit text, etc.).
+    error.message = backend;
+  } else {
+    error.message = statusMessages[status] || `Something went wrong (${status}). Please try again.`;
+  }
+  return error;
+}
+
 // Handle 401 → try refresh
 api.interceptors.response.use(
   (res) => res,
@@ -50,7 +97,7 @@ api.interceptors.response.use(
         await SecureStore.deleteItemAsync("refresh_token");
       }
     }
-    return Promise.reject(error);
+    return Promise.reject(friendlyError(error));
   }
 );
 
@@ -75,7 +122,8 @@ export const authAPI = {
   logout: () => api.post("/auth/logout"),
   refreshToken: (refreshToken: string) =>
     api.post("/auth/refresh", { refreshToken }),
-  sendOtp: (phone: string) => api.post("/auth/send-otp", { phone }),
+  sendOtp: (phone: string, email?: string, purpose?: string) =>
+    api.post("/auth/send-otp", { phone, email, purpose }),
   verifyOtp: (phone: string, code: string) =>
     api.post("/auth/verify-otp", { phone, code }),
   otpLogin: (phone: string, code: string) =>
@@ -228,4 +276,53 @@ export const fintechAPI = {
     api.post("/factoring/inquire", { invoiceId }),
   triggerFunding: (invoiceId: string, partnerId: string) =>
     api.post("/factoring/fund", { invoiceId, partnerId }),
+};
+
+// ─── HOVIN Field Layer (live inbound orders, dock GRN, logistics, 48h cash-out) ──
+// Field = execution on the ground: dispatcher/supplier receives live POs,
+// scans goods at the dock (GRN + auto credit-note), tracks deliveries/GPS/POD,
+// and requests early 48h payout on approved invoices (reverse factoring).
+export const fieldAPI = {
+  // Live order inbox feed
+  liveOrders: (params?: Record<string, string>) =>
+    api.get("/field/orders/live", { params }),
+  // One-tap status shift on a live PO (READY / IN_TRANSIT / DELIVERED)
+  shiftStatus: (orderId: string, status: string) =>
+    api.post(`/field/orders/${orderId}/status`, { status }),
+
+  // Dock scanner → GRN from a scanned barcode + auto credit-note generation
+  scanForGrn: (data: Record<string, unknown>) => api.post("/grn/scan", data),
+  createCreditNote: (data: Record<string, unknown>) =>
+    api.post("/grn/credit-note", data),
+
+  // Logistics + GPS tracking + POD
+  logistics: (params?: Record<string, string>) =>
+    api.get("/logistics/tracking", { params }),
+  trackOrder: (orderId: string) => api.get(`/logistics/orders/${orderId}`),
+  reportPosition: (data: Record<string, unknown>) =>
+    api.post("/logistics/position", data),
+
+  // 48h early cash-out (reverse factoring on approved orders)
+  cashOutEligible: (params?: Record<string, string>) =>
+    api.get("/fintech/cashout/eligible", { params }),
+  cashOutRequest: (data: Record<string, unknown>) =>
+    api.post("/fintech/cashout", data),
+};
+
+// ─── Notifications ─────────────────────────────────
+export interface ServerNotification {
+  id: string;
+  type: string;
+  subject: string;
+  body: string | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export const notificationAPI = {
+  list: (params?: { unreadOnly?: boolean; type?: string }) =>
+    api.get("/notifications", { params }),
+  markRead: (id?: string) => api.post("/notifications/read", { id }),
+  registerPushToken: (token: string, platform: string) =>
+    api.post("/notifications/push-token", { token, platform }),
 };

@@ -8,15 +8,10 @@ module.exports = ({ config }) => ({
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "automatic",
-    splash: {
-      image: "./assets/splash-icon.png",
-      resizeMode: "contain",
-      backgroundColor: "#0A0E1A",
-    },
     scheme: "invo",
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.hotelsvendors.invo",
+      bundleIdentifier: "com.hotelsvendors.hovin",
       associatedDomains: ["applinks:hotelsvendors.com"],
       infoPlist: {
         NSCameraUsageDescription: "HOVIN needs camera access to photograph invoices for financing.",
@@ -31,7 +26,8 @@ module.exports = ({ config }) => ({
       },
     },
     android: {
-      package: "com.hotelsvendors.invo",
+      package: "com.hotelsvendors.hovin",
+      versionCode: 1,
       adaptiveIcon: {
         backgroundColor: "#0A0E1A",
         foregroundImage: "./assets/android-icon-foreground.png",
@@ -62,24 +58,6 @@ module.exports = ({ config }) => ({
     },
     web: {
       favicon: "./assets/favicon.png",
-    },
-    linking: {
-      prefixes: ["invo://", "oliv://", "eta://", "https://www.hotelsvendors.com"],
-      config: {
-        screens: {
-          // Core navigation
-          OrderDetail: "orders/:id",
-          InvoiceDetail: "invoices/:id",
-          PaymentScreen: "pay/:invoiceId",
-          NotificationCenter: "notifications",
-          // Oliv deep links
-          OlivActivation: "oliv/kyc",
-          OlivKycStatus: "oliv/kyc-status",
-          CreditFacility: "oliv/credit-line",
-          // ETA compliance deep links
-          "eta/callback": "eta/callback",
-        },
-      },
     },
     extra: {
       eas: {

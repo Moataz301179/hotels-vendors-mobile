@@ -1,62 +1,56 @@
 /**
- * HOVIN Mobile — Design Tokens (Brand Green / Beige)
+ * HOVIN Mobile — Design Tokens (hotelsvendors.com/hotels/join palette)
  *
- * PROFESSIONAL BRAND ALLOCATION (full palette, not dark-only):
- *   - GREEN #314B43 is the brand background surface. All text on it is WHITE.
- *   - dark green #24382E used for depth / pressed states / deep surfaces.
- *   - BEIGE #ABA294 is the accent — CTA fills, links, active states, and
- *     secondary accent surfaces (it pops against the green background).
- *   - grey #646367 reserved for neutral fills / disabled / wireframe tones.
- *   - Semantic status colors (green/amber/red/blue) stay for order states ONLY.
- *
- * Rationale for the mapping: the `colors.bg` token is overloaded app-wide as
- * both the screen background AND the "contrast text on a colored fill" (e.g.
- * `buttonText: { color: colors.bg }` on `backgroundColor: colors.primary`
- * buttons). To make GREEN #314B43 the background while keeping CTA fills
- * visible and readable, `colors.primary` becomes the BEIGE accent. This yields
- * beige buttons/links on a green background with no per-screen churn.
+ * MOBILE IS DARK THEME (user-agreed), sourced from the live /hotels/join page:
+ *   · Dark grey-black surfaces: bg #0B0F14 · raised #16161f · deep #15151e
+ *   · GOLD #c8a86b (accent gold #8a6d3b) — headings, icons, accents
+ *   · GREEN #314B43 — buttons, pills, brand surfaces
+ *   · BEIGE #ABA294 — secondary accent / checkmarks
+ *   · WHITE text on dark. Grey text: rgba(255,255,255,0.55-0.80)
  */
 
 export const colors = {
-  // Brand primaries (explicit green/beige/grey for direct use)
+  // Brand primaries (join-page palette)
+  gold: "#c8a86b",
+  goldDark: "#8a6d3b",
   green: "#314B43",
   greenDark: "#24382E",
   beige: "#ABA294",
   grey: "#646367",
 
-  // Brand accent "primary" surface = BEIGE (CTA fills, links, active tabs,
-  // avatars, bubbles). Reads clearly on the green background.
-  primary: "#ABA294",
-  primaryDark: "#24382E",
-  primaryMuted: "rgba(171,162,148,0.18)",
+  // Dark grey-black surfaces (join page)
+  bgDeep: "#15151e",
+  bg: "#0B0F14",           // dominant dark background
+  bgRaised: "#16161f",     // card surface
+  bgCard: "#16161f",
+  bgCardHover: "#1e1e28",
+  bgInput: "rgba(255,255,255,0.08)",
+  bgModal: "rgba(11,15,20,0.98)",
 
-  // Accent (beige secondary)
+  // Brand accent "primary" surface
+  primary: "#c8a86b",
+  primaryDark: "#8a6d3b",
+  primaryMuted: "rgba(200,168,107,0.18)",
+
   accent: "#ABA294",
   accentLight: "#C7BFB1",
   accentMuted: "rgba(171,162,148,0.16)",
-
-  // Background layers — GREEN #314B43 is the dominant brand surface.
-  bg: "#314B43",
-  bgCard: "rgba(255,255,255,0.07)",
-  bgCardHover: "rgba(255,255,255,0.12)",
-  bgInput: "rgba(255,255,255,0.10)",
-  bgModal: "rgba(36,56,46,0.97)",
 
   // Light-mode inverse — used for root/chrome when light scheme is active
   bgLight: "#F3F1EC",
   textLight: "#24382E",
 
-  // Borders (white-alpha so they read on green)
+  // Borders (white-alpha so they read on dark)
   border: "rgba(255,255,255,0.14)",
   borderLight: "rgba(255,255,255,0.22)",
 
-  // Text — WHITE on the green background
+  // Text — WHITE on the dark background
   text: "#FFFFFF",
   textSecondary: "rgba(255,255,255,0.80)",
   textMuted: "rgba(255,255,255,0.55)",
 
-  // Heading text color (brand dark neutral) — text over light/glass surfaces
-  head: "#4D4A46",
+  // Heading text color
+  head: "#F2F4F7",
 
   // Status (semantic only, never brand)
   success: "#059669",
@@ -71,7 +65,7 @@ export const colors = {
   disbursed: "#E2E4E9",
 
   // Tab bar
-  tabBg: "rgba(36,56,46,0.96)",
+  tabBg: "rgba(11,15,20,0.96)",
   tabBorder: "rgba(255,255,255,0.12)",
 } as const;
 

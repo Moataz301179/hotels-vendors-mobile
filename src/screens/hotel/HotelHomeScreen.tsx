@@ -16,13 +16,16 @@ import {
 } from "react-native";
 import {
   ShoppingBasket, ClipboardList, FileText, FilePlus2,
-  TrendingUp, Clock, CheckCircle2, Users, ChevronRight,
 } from "lucide-react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
 import { hotelAPI } from "@/api";
 import { orderStatusColor, orderStatusLabel, fmtMoney, fmtDate, greeting } from "@/utils/format";
 import { CategoryGridSection } from "@/components/CategoryGrid";
+import {
+  Panel, Readout, MechButton, StatusPill, Plate, Led, SignalBar,
+  SlotDividerRows, MONO,
+} from "@/components/ops";
 
 // ─── Types ────────────────────────────────────────────
 
@@ -180,7 +183,7 @@ export default function HotelHomeScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>{greeting()}</Text>
+          <Plate tone={colors.textMuted}>Ops Console</Plate>
           <Text style={styles.name}>{user?.name || "Hotel"}</Text>
           {user?.companyName ? (
             <Text style={styles.company}>{user.companyName}</Text>
@@ -191,141 +194,111 @@ export default function HotelHomeScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* ─── Hero KPI: Monthly Spend ─── */}
-      <View style={styles.heroKpi}>
-        <View style={styles.heroTop}>
-          <View style={styles.heroIconWrap}>
-            <TrendingUp size={20} color={colors.accent} />
-          </View>
-          <View style={styles.heroLabelWrap}>
-            <Text style={styles.heroLabel}>MONTHLY SPEND</Text>
-            <Text style={styles.heroSubLabel}>
-              YTD: {fmtMoney(totalSpend)}
-            </Text>
-          </View>
+      <SignalBar
+        items={[
+          { label: "API LINK" },
+          { label: "ETA BRIDGE", tone: colors.green },
+          { label: orders.length + " ORDERS" },
+        ]}
+      />
+
+      <Panel tag="FIG-01 - SPEND" style={{ marginTop: spacing.md }}>
+        <View style={ops.heroRow}>
+          <Led color={colors.gold} />
+          <Plate style={{ marginLeft: spacing.sm }}>Monthly Spend</Plate>
         </View>
-        <Text style={styles.heroValue}>{fmtMoney(monthlySpend)}</Text>
-      </View>
+        <Readout value={fmtMoney(monthlySpend)} caption={"YTD " + fmtMoney(totalSpend)} />
+      </Panel>
 
-      {/* ─── KPI Row: Pending · Delivered · Suppliers ─── */}
       <View style={styles.kpiRow}>
-        <KpiCard
-          icon={<Clock size={16} color={colors.warning} />}
-          value={pendingCount}
-          label="Pending"
-          tone={colors.warning}
-        />
-        <KpiCard
-          icon={<CheckCircle2 size={16} color={colors.success} />}
-          value={deliveredCount}
-          label="Delivered"
-          tone={colors.success}
-        />
-        <KpiCard
-          icon={<Users size={16} color={colors.info} />}
-          value={activeSuppliers}
-          label="Suppliers"
-          tone={colors.info}
-        />
+        <Panel tag="PIPE" style={{ flex: 1, marginBottom: 0, padding: spacing.md }}>
+          <View style={ops.miniKpiTop}><Led color={colors.warning} size={6} /><Text style={ops.miniKpiCap}>PENDING</Text></View>
+          <Text style={[ops.miniKpiVal, { color: colors.warning, fontFamily: MONO }]}>{pendingCount}</Text>
+        </Panel>
+        <Panel tag="OK" style={{ flex: 1, marginBottom: 0, padding: spacing.md }}>
+          <View style={ops.miniKpiTop}><Led color={colors.success} size={6} /><Text style={ops.miniKpiCap}>DELIVERED</Text></View>
+          <Text style={[ops.miniKpiVal, { color: colors.success, fontFamily: MONO }]}>{deliveredCount}</Text>
+        </Panel>
+        <Panel tag="SRC" style={{ flex: 1, marginBottom: 0, padding: spacing.md }}>
+          <View style={ops.miniKpiTop}><Led color={colors.info} size={6} /><Text style={ops.miniKpiCap}>SUPPLIERS</Text></View>
+          <Text style={[ops.miniKpiVal, { color: colors.info, fontFamily: MONO }]}>{activeSuppliers}</Text>
+        </Panel>
       </View>
 
-      {/* ─── Quick Actions Grid ─── */}
-      <Text style={styles.sectionLabel}>QUICK ACTIONS</Text>
+      <Plate style={{ marginBottom: spacing.sm }}>Commands</Plate>
+      <SlotDividerRows />
       <View style={styles.actionsGrid}>
         {quickActions.map((action) => {
           const Icon = action.icon;
           return (
-            <TouchableOpacity
-              key={action.label}
-              style={styles.actionCard}
-              onPress={() => navigation.navigate(action.screen)}
-              activeOpacity={0.85}
-            >
-              <View style={[styles.actionIconWrap, { backgroundColor: action.color + "1A" }]}>
-                <Icon size={22} color={action.color} />
+            <MechButton key={action.label} onPress={() => navigation.navigate(action.screen)}>
+              <View style={ops.actionRow}>
+                <Icon size={15} color={colors.bg} />
+                <Text style={ops.actionLabelDark}>{action.label}</Text>
               </View>
-              <Text style={styles.actionLabel}>{action.label}</Text>
-            </TouchableOpacity>
+            </MechButton>
           );
         })}
       </View>
 
-      {/* ─── Recent Orders ─── */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionLabel}>RECENT ORDERS</Text>
+        <Plate>Recent Orders</Plate>
         <TouchableOpacity onPress={() => navigation.navigate("OrdersTab")}>
-          <Text style={styles.seeAll}>See all</Text>
+          <Text style={styles.seeAll}>View all</Text>
         </TouchableOpacity>
       </View>
       {recentOrders.length === 0 ? (
-        <View style={styles.emptyCard}>
+        <Panel tag="EMPTY">
           <Text style={styles.emptyText}>No orders yet</Text>
           <Text style={styles.emptySubtext}>Browse the catalog to place your first order</Text>
-        </View>
+        </Panel>
       ) : (
         recentOrders.map((o) => (
           <TouchableOpacity
             key={o.id}
-            style={styles.orderCard}
             onPress={() => navigation.navigate("OrderDetail", { id: o.id })}
             activeOpacity={0.85}
           >
-            <View style={styles.orderHeader}>
-              <Text style={styles.orderNumber}>{o.orderNumber || "—"}</Text>
-              {o.status ? (
-                <View style={[styles.badge, { backgroundColor: orderStatusColor(o.status) + "22" }]}>
-                  <Text style={[styles.badgeText, { color: orderStatusColor(o.status) }]}>
-                    {orderStatusLabel(o.status)}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-            <Text style={styles.orderSupplier}>
-              {o.supplier?.name || "Supplier"}
-            </Text>
-            <View style={styles.orderFooter}>
-              <Text style={styles.orderAmount}>{fmtMoney(Number(o.total || 0))}</Text>
-              <Text style={styles.orderDate}>{fmtDate(o.deliveryDate || o.createdAt)}</Text>
-            </View>
+            <Panel tag={o.status ? orderStatusLabel(o.status).toUpperCase() : "PO"}>
+              <View style={styles.orderHeader}>
+                <Text style={[styles.orderNumber, { fontFamily: MONO }]}>{o.orderNumber || "-"}</Text>
+                {o.status ? <StatusPill label={orderStatusLabel(o.status)} tone={orderStatusColor(o.status)} /> : null}
+              </View>
+              <Text style={styles.orderSupplier}>{o.supplier?.name || "Supplier"}</Text>
+              <View style={styles.orderFooter}>
+                <Text style={[styles.orderAmount, { fontFamily: MONO }]}>{fmtMoney(Number(o.total || 0))}</Text>
+                <Text style={styles.orderDate}>{fmtDate(o.deliveryDate || o.createdAt)}</Text>
+              </View>
+            </Panel>
           </TouchableOpacity>
         ))
       )}
 
-      {/* ─── Spend by Category Mini Chart ─── */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionLabel}>SPEND BY CATEGORY</Text>
+        <Plate>Spend by Category</Plate>
       </View>
       {cats.length === 0 ? (
-        <View style={styles.emptyCard}>
+        <Panel tag="NO DATA">
           <Text style={styles.emptyText}>No spend data yet</Text>
           <Text style={styles.emptySubtext}>Category breakdown appears after your first orders</Text>
-        </View>
+        </Panel>
       ) : (
-        <View style={styles.chartCard}>
+        <Panel tag="FIG-02 - ALLOC">
           {cats.map((c, i) => {
             const barWidth = Math.max((c.amount / maxAmount) * CHART_BAR_AREA_WIDTH, 4);
             return (
               <View key={c.category} style={styles.chartRow}>
                 <Text style={styles.chartLabel} numberOfLines={1}>{c.category}</Text>
                 <View style={styles.chartBarTrack}>
-                  <View
-                    style={[
-                      styles.chartBar,
-                      {
-                        width: barWidth,
-                        backgroundColor: BAR_COLORS[i % BAR_COLORS.length],
-                      },
-                    ]}
-                  />
+                  <View style={[styles.chartBar, { width: barWidth, backgroundColor: BAR_COLORS[i % BAR_COLORS.length] }]} />
                 </View>
-                <Text style={styles.chartAmount}>{fmtMoney(c.amount)}</Text>
+                <Text style={[styles.chartAmount, { fontFamily: MONO }]}>{fmtMoney(c.amount)}</Text>
               </View>
             );
           })}
-        </View>
+        </Panel>
       )}
 
-      {/* ─── Category Grid (browse) ─── */}
       <View style={styles.categorySection}>
         <CategoryGridSection
           title="Browse by Category"
@@ -336,28 +309,14 @@ export default function HotelHomeScreen({ navigation }: any) {
   );
 }
 
-// ─── KPI Card sub-component ──────────────────────────
-
-function KpiCard({
-  icon, value, label, tone,
-}: {
-  icon: React.ReactNode;
-  value: number | string;
-  label: string;
-  tone: string;
-}) {
-  return (
-    <View style={styles.kpiCard}>
-      <View style={[styles.kpiIconWrap, { backgroundColor: tone + "1A" }]}>
-        {icon}
-      </View>
-      <Text style={[styles.kpiValue, { color: tone }]}>{value}</Text>
-      <Text style={styles.kpiLabel}>{label}</Text>
-    </View>
-  );
-}
-
-// ─── Styles ──────────────────────────────────────────
+const ops = StyleSheet.create({
+  heroRow: { flexDirection: "row", alignItems: "center", marginBottom: spacing.xs },
+  miniKpiTop: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: spacing.sm },
+  miniKpiCap: { fontSize: 9, letterSpacing: 1.2, color: colors.textMuted, fontWeight: "700" },
+  miniKpiVal: { fontSize: 26, fontWeight: "700", letterSpacing: -0.5 },
+  actionRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  actionLabelDark: { color: colors.bg, fontSize: 12.5, fontWeight: "800", letterSpacing: 0.4, textTransform: "uppercase" },
+});
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },

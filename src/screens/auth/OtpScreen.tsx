@@ -25,6 +25,8 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
 import { normalizePhone } from "@/utils/phone";
+import { openOlivOnboarding } from "@/utils/olivLink";
+import { SupplierOnboardingBot } from "@/components/ai-assistant/supplier-onboarding-chatbot";
 
 const RESEND_SECONDS = 60;
 
@@ -35,6 +37,7 @@ interface OtpParams {
   email?: string;
   password?: string;
   role?: string;
+  creditInterest?: boolean;
 }
 
 export default function OtpScreen() {
@@ -52,9 +55,9 @@ export default function OtpScreen() {
   const resend = async () => {
     setSending(true);
     try {
-      await sendOtp(phone);
+      await sendOtp(phone, params.email, params.mode === "register" ? "REGISTER" : "LOGIN");
       setSeconds(RESEND_SECONDS);
-      Alert.alert("Code sent", `We sent a 6-digit code to ${phone}`);
+      Alert.alert("Code sent", params.email ? `We sent a 6-digit code to ${params.email}` : `We sent a 6-digit code to ${phone}`);
     } catch (err: any) {
       Alert.alert("Error", err.message || "Could not send code");
     } finally {
@@ -98,6 +101,19 @@ export default function OtpScreen() {
           otpCode: code.trim(),
           email: params.email || undefined,
         });
+        // Oliv credit onboarding — COMPULSORY step (no choice): opens the CHV000
+        // pre-filled Oliv onboarding so every new user's financing is onboarded
+        // and the referral + commission is attributed to HotelsVendors. It is
+        // the only offering until the real catalog goes live.
+        try {
+          await openOlivOnboarding({
+            name: params.name || "",
+            phone,
+            email: params.email || undefined,
+          });
+        } catch (e) {
+          // referral open failed — account still created, credit captured on next step
+        }
       } else {
         await otpLogin(phone, code.trim());
       }
@@ -115,15 +131,11 @@ export default function OtpScreen() {
     >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Image
-            source={require("../../../assets/brand/hovin-logo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <Text style={styles.logoWord}>HOVIN</Text>
           <Text style={styles.title}>Verify your number</Text>
           <Text style={styles.subtext}>
             Enter the 6-digit code we sent to{`\n`}
-            <Text style={styles.phone}>{phone}</Text>
+            <Text style={styles.phone}>{params.email || phone}</Text>
           </Text>
         </View>
 
@@ -171,7 +183,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flexGrow: 1, justifyContent: "center", padding: spacing.xl },
   header: { alignItems: "center", marginBottom: spacing.xxxl },
-  logo: { width: 150, aspectRatio: 769 / 415, resizeMode: "contain", marginBottom: spacing.xl },
+  logoWord: { fontSize: 28, fontWeight: "800", letterSpacing: 3, color: colors.text, fontFamily: "PlusJakartaSans_700Bold", marginBottom: spacing.sm },
   title: { ...typography.h2, color: colors.text, textAlign: "center" },
   subtext: { ...typography.body, color: colors.textSecondary, textAlign: "center", marginTop: spacing.sm, lineHeight: 22 },
   phone: { color: colors.primary, fontWeight: "600" },

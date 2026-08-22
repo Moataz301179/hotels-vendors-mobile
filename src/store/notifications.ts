@@ -1,10 +1,12 @@
 /**
  * Notification Store — Zustand
  * Manages in-app notifications list + push permission state.
+ * Syncs with the backend so order events (approve/ship/deliver) appear here.
  */
 
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
+import { notificationAPI, type ServerNotification } from "../api";
 
 export interface InAppNotification {
   id: string;
@@ -15,6 +17,27 @@ export interface InAppNotification {
   createdAt: string;
   orderId?: string;
   invoiceId?: string;
+}
+
+function mapServer(n: ServerNotification): InAppNotification {
+  const raw = n.type.toLowerCase();
+  const category: InAppNotification["category"] = raw.includes("invoice")
+    ? "invoice"
+    : raw.includes("payment") || raw.includes("pay")
+      ? "payment"
+      : raw.includes("order")
+        ? "order"
+        : raw.includes("oliv") || raw.includes("kyc") || raw.includes("factoring")
+          ? "factoring"
+          : "system";
+  return {
+    id: n.id,
+    title: n.subject,
+    body: n.body ?? "",
+    category,
+    read: !!n.readAt,
+    createdAt: n.createdAt,
+  };
 }
 
 interface NotificationState {
@@ -29,6 +52,8 @@ interface NotificationState {
   clearAll: () => void;
   loadFromStorage: () => Promise<void>;
   saveToStorage: (notifications: InAppNotification[]) => Promise<void>;
+  syncFromServer: () => Promise<void>;
+  registerPushToken: (token: string, platform: string) => Promise<void>;
 }
 
 function computeUnread(notifications: InAppNotification[]): number {
@@ -55,21 +80,26 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       return { notifications, unreadCount: computeUnread(notifications) };
     }),
 
-  markRead: (id: string) =>
+  markRead: (id: string) => {
     set((state) => {
       const notifications = state.notifications.map((n) =>
         n.id === id ? { ...n, read: true } : n
       );
       get().saveToStorage(notifications);
       return { notifications, unreadCount: computeUnread(notifications) };
-    }),
+    });
+    // Best-effort server sync
+    notificationAPI.markRead(id).catch(() => {});
+  },
 
-  markAllRead: () =>
+  markAllRead: () => {
     set((state) => {
       const notifications = state.notifications.map((n) => ({ ...n, read: true }));
       get().saveToStorage(notifications);
       return { notifications, unreadCount: 0 };
-    }),
+    });
+    notificationAPI.markRead().catch(() => {});
+  },
 
   clearAll: () =>
     set(() => {
@@ -93,5 +123,32 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     try {
       await SecureStore.setItemAsync("invo_notifications", JSON.stringify(notifications));
     } catch {}
+  },
+
+  syncFromServer: async () => {
+    try {
+      const { data } = await notificationAPI.list();
+      if (data?.success && data?.data) {
+        const mapped = (data.data.notifications as ServerNotification[]).map(mapServer);
+        // Merge: server is source of truth, but keep local-only items too
+        const merged = [...mapped];
+        get().saveToStorage(merged);
+        set({
+          notifications: merged,
+          unreadCount: data.data.unreadCount ?? computeUnread(merged),
+        });
+      }
+    } catch {
+      // fall back to local storage on network failure
+      await get().loadFromStorage();
+    }
+  },
+
+  registerPushToken: async (token: string, platform: string) => {
+    try {
+      await notificationAPI.registerPushToken(token, platform);
+    } catch {
+      // non-fatal; token registration is best-effort
+    }
   },
 }));

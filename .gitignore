@@ -83,3 +83,6 @@ yarn-error.*
 *.tsbuildinfo
 
 # @end expo-cli
+# local backups & hermes session junk
+.backups_*
+.hermes/

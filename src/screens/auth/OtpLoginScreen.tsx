@@ -33,11 +33,7 @@ export default function OtpLoginScreen({ navigation }: any) {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Image
-            source={require("../../../assets/brand/hovin-logo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <Text style={styles.logoWord}>HOVIN</Text>
           <Text style={styles.title}>Sign in with mobile</Text>
           <Text style={styles.subtext}>
             We'll text you a 6-digit code. Your number must be registered to the
@@ -65,8 +61,8 @@ export default function OtpLoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flexGrow: 1, justifyContent: "center", padding: spacing.xl },
-  header: { alignItems: "center", marginBottom: spacing.xxxl },
-  logo: { width: 150, aspectRatio: 769 / 415, resizeMode: "contain", marginBottom: spacing.xl },
+  header: { alignItems: "center", marginBottom: spacing.xxl },
+  logoWord: { fontSize: 28, fontWeight: "800", letterSpacing: 3, color: colors.text, fontFamily: "PlusJakartaSans_700Bold", marginBottom: spacing.sm },
   title: { ...typography.h2, color: colors.text, textAlign: "center" },
   subtext: { ...typography.body, color: colors.textSecondary, textAlign: "center", marginTop: spacing.sm, lineHeight: 22 },
   form: { gap: spacing.md },

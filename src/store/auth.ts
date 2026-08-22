@@ -17,7 +17,7 @@ interface AuthState {
   login: (identifier: string, password: string) => Promise<void>;
   register: (data: RegisterPayload) => Promise<void>;
   otpLogin: (phone: string, code: string) => Promise<void>;
-  sendOtp: (phone: string) => Promise<void>;
+  sendOtp: (phone: string, email?: string, purpose?: string) => Promise<void>;
   logout: () => Promise<void>;
   loadUser: () => Promise<void>;
   restoreSession: () => Promise<void>;
@@ -90,8 +90,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  sendOtp: async (phone: string) => {
-    const { data } = await authAPI.sendOtp(phone);
+  sendOtp: async (phone: string, email?: string, purpose: string = "REGISTER") => {
+    const { data } = await authAPI.sendOtp(phone, email, purpose);
     if (!data.success) throw new Error(data.error || "Could not send code");
   },
 

@@ -1,6 +1,33 @@
 {
   "expo": {
     "name": "HOVIN",
-    "slug": "invo"
+    "slug": "hovin",
+    "version": "1.0.0",
+    "backgroundColor": "#0B0F14",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0F14"
+    },
+    "android": {
+      "backgroundColor": "#0B0F14",
+      "package": "com.hotelsvendors.hovin",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#0B0F14"
+      }
+    },
+    "ios": {
+      "backgroundColor": "#0B0F14",
+      "userInterfaceStyle": "dark",
+      "bundleIdentifier": "com.hotelsvendors.hovin",
+      "supportsTablet": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
   }
 }
