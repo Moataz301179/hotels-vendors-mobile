@@ -16,7 +16,7 @@ interface DeliveryStop {
   hotelName: string;
   hotelAddress: string;
   hotelCity: string;
-  estimatedArrival: string;
+  estimatedArrival: string | null;
   status: string;
   orderId: string;
   orderNumber: string;
@@ -29,11 +29,23 @@ interface TripData {
   tripNumber: string;
   driverName: string;
   vehiclePlate: string;
-  scheduledDate: string;
+  scheduledDate: string | null;
   status: string;
   stops: DeliveryStop[];
   completedStops: number;
   totalStops: number;
+}
+
+function formatDate(value: string | null): string {
+  if (!value) return "Date not set";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Date not set" : date.toLocaleDateString();
+}
+
+function formatEta(value: string | null): string {
+  if (!value) return "ETA not set";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "ETA not set" : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function DriverDeliveryScreen({ navigation }: any) {
@@ -73,7 +85,7 @@ export default function DriverDeliveryScreen({ navigation }: any) {
             <Truck size={20} color={colors.primary} />
             <View>
               <Text style={styles.tripNumber}>{trip.tripNumber}</Text>
-              <Text style={styles.tripDate}>{new Date(trip.scheduledDate).toLocaleDateString()}</Text>
+              <Text style={styles.tripDate}>{formatDate(trip.scheduledDate)}</Text>
             </View>
           </View>
           <View style={styles.vehicleBadge}>
@@ -100,7 +112,7 @@ export default function DriverDeliveryScreen({ navigation }: any) {
       {trip?.stops?.length ? trip.stops.map((stop) => (
         <TouchableOpacity
           key={stop.id}
-          style={[styles.stopCard, stop.status === "DELIVERED" && styles.stopCardCompleted]}
+          style={[styles.stopCard, ["DELIVERED", "POD_CAPTURED"].includes(stop.status) && styles.stopCardCompleted]}
           onPress={() => navigation.navigate("PODScreen", { stopId: stop.id, tripId: trip.tripId })}
         >
           <View style={styles.stopHeader}>
@@ -111,7 +123,7 @@ export default function DriverDeliveryScreen({ navigation }: any) {
               <Text style={styles.hotelName}>{stop.hotelName}</Text>
               <Text style={styles.hotelAddress}>{stop.hotelAddress || stop.hotelCity}</Text>
             </View>
-            {stop.status === "DELIVERED" ? (
+            {["DELIVERED", "POD_CAPTURED"].includes(stop.status) ? (
               <CheckCircle size={20} color={colors.success} />
             ) : (
               <MapPin size={16} color={colors.textMuted} />
@@ -125,14 +137,14 @@ export default function DriverDeliveryScreen({ navigation }: any) {
             </View>
             <View style={styles.detailItem}>
               <Clock size={12} color={colors.textMuted} />
-              <Text style={styles.detailText}>{new Date(stop.estimatedArrival).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</Text>
+              <Text style={styles.detailText}>{formatEta(stop.estimatedArrival)}</Text>
             </View>
             <View style={styles.detailItem}>
               <Text style={styles.orderTotal}>EGP {stop.orderTotal.toLocaleString()}</Text>
             </View>
           </View>
 
-          {stop.status !== "DELIVERED" && (
+          {!["DELIVERED", "POD_CAPTURED"].includes(stop.status) && (
             <View style={styles.actionRow}>
               <TouchableOpacity
                 style={styles.podBtn}
