@@ -21,6 +21,7 @@ interface AuthState {
   logout: () => Promise<void>;
   loadUser: () => Promise<void>;
   restoreSession: () => Promise<void>;
+  syncClerkSession: (isLoaded: boolean, isSignedIn: boolean) => Promise<void>;
 }
 
 // Backend returns the org role (e.g. "OWNER") in `role` and the platform
@@ -37,62 +38,30 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
 
   login: async (identifier: string, password: string) => {
-    set({ isLoading: true });
-    try {
-      const { data } = await authAPI.login(identifier, password);
-      if (data.success && data.data) {
-        const { accessToken, refreshToken, user } = data.data;
-        await SecureStore.setItemAsync("access_token", accessToken);
-        if (refreshToken) await SecureStore.setItemAsync("refresh_token", refreshToken);
-        set({ user, role: platformRoleOf(user), isAuthenticated: true, isLoading: false });
-      } else {
-        throw new Error(data.error || "Login failed");
-      }
-    } catch (err) {
-      set({ isLoading: false });
-      throw err;
-    }
+    void identifier;
+    void password;
+    set({ isLoading: false });
+    throw new Error("Use Clerk sign-in for native authentication.");
   },
 
   register: async (regData) => {
-    set({ isLoading: true });
-    try {
-      const { data } = await authAPI.register(regData);
-      if (data.success && data.data) {
-        const { accessToken, refreshToken, user } = data.data;
-        await SecureStore.setItemAsync("access_token", accessToken);
-        if (refreshToken) await SecureStore.setItemAsync("refresh_token", refreshToken);
-        set({ user, role: platformRoleOf(user), isAuthenticated: true, isLoading: false });
-      } else {
-        throw new Error(data.error || "Registration failed");
-      }
-    } catch (err) {
-      set({ isLoading: false });
-      throw err;
-    }
+    void regData;
+    set({ isLoading: false });
+    throw new Error("Use Clerk sign-up for native authentication.");
   },
 
   otpLogin: async (phone: string, code: string) => {
-    set({ isLoading: true });
-    try {
-      const { data } = await authAPI.otpLogin(phone, code);
-      if (data.success && data.data) {
-        const { accessToken, refreshToken, user } = data.data;
-        await SecureStore.setItemAsync("access_token", accessToken);
-        if (refreshToken) await SecureStore.setItemAsync("refresh_token", refreshToken);
-        set({ user, role: platformRoleOf(user), isAuthenticated: true, isLoading: false });
-      } else {
-        throw new Error(data.error || "Sign-in failed");
-      }
-    } catch (err) {
-      set({ isLoading: false });
-      throw err;
-    }
+    void phone;
+    void code;
+    set({ isLoading: false });
+    throw new Error("Use Clerk verification for native authentication.");
   },
 
   sendOtp: async (phone: string, email?: string, purpose: string = "REGISTER") => {
-    const { data } = await authAPI.sendOtp(phone, email, purpose);
-    if (!data.success) throw new Error(data.error || "Could not send code");
+    void phone;
+    void email;
+    void purpose;
+    throw new Error("Use Clerk verification for native authentication.");
   },
 
   logout: async () => {
@@ -114,16 +83,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   restoreSession: async () => {
-    set({ isLoading: true });
-    try {
-      const token = await SecureStore.getItemAsync("access_token");
-      if (token) {
-        await get().loadUser();
-      }
-    } catch {
-      set({ user: null, isAuthenticated: false });
-    } finally {
-      set({ isLoading: false });
+    // Clerk owns session restoration. App.tsx calls syncClerkSession after
+    // Clerk has finished loading so we never infer auth from stale JWT state.
+    set({ isLoading: false });
+  },
+
+  syncClerkSession: async (isLoaded: boolean, isSignedIn: boolean) => {
+    if (!isLoaded) {
+      set({ isLoading: true });
+      return;
     }
+    if (!isSignedIn) {
+      set({ user: null, role: null, isAuthenticated: false, isLoading: false });
+      return;
+    }
+    set({ isLoading: true });
+    await get().loadUser();
+    set({ isLoading: false });
   },
 }));

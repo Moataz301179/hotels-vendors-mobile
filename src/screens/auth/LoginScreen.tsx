@@ -3,6 +3,7 @@
  */
 
 import React, { useState } from "react";
+import { useSignIn } from "@clerk/expo";
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image,
 } from "react-native";
@@ -13,7 +14,9 @@ import { Panel, Plate, Led, MechButton, MONO } from "@/components/ops";
 export default function LoginScreen({ navigation }: any) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const { login, isLoading } = useAuthStore();
+  const loadUser = useAuthStore((state) => state.loadUser);
+  const { signIn, fetchStatus } = useSignIn();
+  const isLoading = fetchStatus === "fetching";
 
   const handleLogin = async () => {
     if (!identifier || !password) {
@@ -21,7 +24,18 @@ export default function LoginScreen({ navigation }: any) {
       return;
     }
     try {
-      await login(identifier.trim(), password);
+      const { error } = await signIn.password({
+        emailAddress: identifier.trim(),
+        password,
+      });
+      if (error) {
+        throw new Error(error.message || "Invalid credentials");
+      }
+      if (signIn.status !== "complete") {
+        throw new Error("Additional verification is required to continue.");
+      }
+      await signIn.finalize();
+      await loadUser();
     } catch (err: any) {
       Alert.alert("Login Failed", err.message || "Invalid credentials");
     }
@@ -48,7 +62,7 @@ export default function LoginScreen({ navigation }: any) {
               style={styles.input}
               value={identifier}
               onChangeText={setIdentifier}
-              placeholder="you@hotel.com or +20 1X0 XXX XXXX"
+              placeholder="you@hotel.com"
               placeholderTextColor={colors.textMuted}
               autoCapitalize="none"
             />
@@ -87,7 +101,7 @@ export default function LoginScreen({ navigation }: any) {
           </Panel>
         </View>
 
-        <Text style={styles.trust}>SECURE SIGN-IN // ETA-COMPLIANT INVOICING</Text>
+        <Text style={styles.trust}>SECURE SIGN-IN // ETA-COMPLIANT HOVIN</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

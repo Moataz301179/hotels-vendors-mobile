@@ -3,20 +3,25 @@
  * Points to the VPS backend
  */
 
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 import * as SecureStore from "expo-secure-store";
+import { getClerkToken } from "./clerk-token";
 
-const API_BASE = "https://www.hotelsvendors.com";
+const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL || "https://www.hotelsvendors.com";
+
+const v2Unavailable = (operation: string): Promise<AxiosResponse> =>
+  Promise.reject(new Error(`${operation} is not available in the verified /api/v2 contract.`));
 
 const api = axios.create({
-  baseURL: `${API_BASE}/api/v1`,
+  baseURL: `${API_BASE}/api/v2`,
   timeout: 30000,
   headers: { "Content-Type": "application/json" },
 });
 
-// Attach JWT from secure storage
+// Clerk is the source of truth for native sessions. The SecureStore fallback
+// remains only for legacy screens until they are migrated to Clerk flows.
 api.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync("access_token");
+  const token = (await getClerkToken()) || await SecureStore.getItemAsync("access_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -70,35 +75,11 @@ function friendlyError(error: any): any {
   return error;
 }
 
-// Handle 401 → try refresh
+// Clerk refreshes sessions through its provider. Do not attempt the retired
+// custom JWT refresh flow against the v2 API.
 api.interceptors.response.use(
   (res) => res,
-  async (error) => {
-    const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
-      original._retry = true;
-      try {
-        const refreshToken = await SecureStore.getItemAsync("refresh_token");
-        if (refreshToken) {
-          const { data } = await axios.post(`${API_BASE}/api/v1/auth/refresh`, {
-            refreshToken,
-          });
-          if (data.success && data.data?.accessToken) {
-            await SecureStore.setItemAsync("access_token", data.data.accessToken);
-            if (data.data.refreshToken) {
-              await SecureStore.setItemAsync("refresh_token", data.data.refreshToken);
-            }
-            original.headers.Authorization = `Bearer ${data.data.accessToken}`;
-            return api(original);
-          }
-        }
-      } catch {
-        await SecureStore.deleteItemAsync("access_token");
-        await SecureStore.deleteItemAsync("refresh_token");
-      }
-    }
-    return Promise.reject(friendlyError(error));
-  }
+  (error) => Promise.reject(friendlyError(error))
 );
 
 export default api;
@@ -114,91 +95,80 @@ export interface RegisterPayload {
 }
 
 export const authAPI = {
+  // Sign-in is handled by Clerk in the native UI. These methods are retained
+  // only for callers still being migrated and must not be used for new flows.
   login: (identifier: string, password: string) =>
-    api.post("/auth/login", { identifier, password }),
+    Promise.reject(new Error("Use Clerk sign-in for native authentication.")),
   register: (data: RegisterPayload) =>
-    api.post("/auth/register", data),
-  me: () => api.get("/auth/me"),
-  logout: () => api.post("/auth/logout"),
+    Promise.reject(new Error("Use Clerk sign-up for native authentication.")),
+  me: () => api.get("/me"),
+  logout: () => Promise.resolve({ data: { success: true } }),
   refreshToken: (refreshToken: string) =>
-    api.post("/auth/refresh", { refreshToken }),
+    Promise.reject(new Error("Custom JWT refresh is retired; Clerk refreshes the session.")),
   sendOtp: (phone: string, email?: string, purpose?: string) =>
-    api.post("/auth/send-otp", { phone, email, purpose }),
+    Promise.reject(new Error("Use Clerk verification for native authentication.")),
   verifyOtp: (phone: string, code: string) =>
-    api.post("/auth/verify-otp", { phone, code }),
+    Promise.reject(new Error("Use Clerk verification for native authentication.")),
   otpLogin: (phone: string, code: string) =>
-    api.post("/auth/otp-login", { phone, code }),
+    Promise.reject(new Error("Use Clerk verification for native authentication.")),
 };
 
 // ─── Hotel Buyer ─────────────────────────────────────
 export const hotelAPI = {
   catalog: (params?: Record<string, string>) =>
-    api.get("/hotel/catalog", { params }),
+    api.get("/marketplace", { params }),
   orders: (params?: Record<string, string>) =>
-    api.get("/hotel/orders", { params }),
-  spend: () => api.get("/hotel/spend"),
-  credit: () => api.get("/hotel/credit"),
-  cashflow: () => api.get("/hotel/cashflow"),
-  financing: () => api.get("/hotel/financing"),
-  scheduledOrders: () => api.get("/hotel/scheduled-orders"),
-  updateScheduledOrder: (id: string, data: Record<string, unknown>) =>
-    api.patch(`/hotel/scheduled-orders/${id}`, data),
-  reconciliations: () => api.get("/hotel/inventory/reconciliations"),
+    api.get("/orders", { params }),
+  spend: () => api.get("/dashboard"),
+  credit: () => api.get("/funding"),
+  cashflow: () => api.get("/funding"),
+  financing: () => api.get("/funding"),
+  scheduledOrders: () => api.get("/orders"),
+  updateScheduledOrder: (_id: string, _data: Record<string, unknown>) =>
+    v2Unavailable("Scheduled-order updates"),
+  reconciliations: () => v2Unavailable("Inventory reconciliation"),
 };
 
 // ─── Supplier ────────────────────────────────────────
 export const supplierAPI = {
   inventory: (params?: Record<string, string>) =>
-    api.get("/supplier/inventory", { params }),
+    api.get("/catalog", { params }),
   orders: (params?: Record<string, string>) =>
-    api.get("/supplier/orders", { params }),
+    api.get("/orders", { params }),
   dashboard: (params?: Record<string, string>) =>
-    api.get("/supplier/dashboard", { params }),
-  order: (id: string) => api.get(`/orders/${id}`),
-  grns: (params?: Record<string, string>) =>
-    api.get("/grn", { params }),
-  onboard: (data: Record<string, unknown>) =>
-    api.post("/supplier/onboard", data),
-  aiUpload: (products: Array<Record<string, unknown>>) =>
-    api.post("/supplier/ai-upload", { products }),
-  catalogImport: (file: any) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    return api.post("/supplier/catalog/import", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-  },
-  catalogImportTemplate: () =>
-    api.get("/supplier/catalog/import?template=true", {
-      responseType: "arraybuffer",
-    }),
+    api.get("/dashboard", { params }),
+  order: (_id: string) => v2Unavailable("Supplier order detail"),
+  grns: (_params?: Record<string, string>) => v2Unavailable("GRN listing"),
+  onboard: (data: Record<string, unknown>) => api.post("/onboarding", data),
+  aiUpload: (_products: Array<Record<string, unknown>>) => v2Unavailable("AI catalog upload"),
+  catalogImport: (_file: any) => v2Unavailable("Supplier catalog import"),
+  catalogImportTemplate: () => v2Unavailable("Supplier catalog import template"),
 };
 
 // ─── Products ────────────────────────────────────────
 export const productAPI = {
   list: (params?: Record<string, string>) =>
-    api.get("/products", { params }),
-  get: (id: string) => api.get(`/products/${id}`),
+    api.get("/marketplace", { params }),
+  get: (_id: string) => v2Unavailable("Product detail"),
 };
 
 // ─── Orders ──────────────────────────────────────────
 export const orderAPI = {
   create: (data: Record<string, unknown>) =>
     api.post("/orders", data),
-  get: (id: string) => api.get(`/orders/${id}`),
+  get: (_id: string) => v2Unavailable("Order detail"),
   list: (params?: Record<string, string>) =>
     api.get("/orders", { params }),
-  approve: (id: string) => api.post(`/orders/${id}/approve`),
+  approve: (id: string) => api.patch("/orders", { id, status: "APPROVED" }),
   reject: (id: string, reason: string) =>
-    api.post(`/orders/${id}/reject`, { reason }),
-  status: (id: string) => api.get(`/orders/${id}/status`),
+    api.patch("/orders", { id, status: "REJECTED", reason }),
+  status: (_id: string) => v2Unavailable("Order status detail"),
 };
 
 // ─── Invoices ────────────────────────────────────────
 export const invoiceAPI = {
-  list: (params?: Record<string, string>) =>
-    api.get("/invoices", { params }),
-  get: (id: string) => api.get(`/invoices/${id}`),
+  list: (_params?: Record<string, string>) => v2Unavailable("Invoice listing"),
+  get: (_id: string) => v2Unavailable("Invoice detail"),
 };
 
 // ─── Payments ────────────────────────────────────────
@@ -226,8 +196,7 @@ export interface PaymentIntentResponse {
 }
 
 export const paymentAPI = {
-  createIntent: (data: PaymentIntentRequest) =>
-    api.post("/payments/create-intent", data),
+  createIntent: (_data: PaymentIntentRequest) => v2Unavailable("Payment intent creation"),
 };
 
 // ─── AI Assistant ────────────────────────────────────
@@ -244,38 +213,32 @@ export const aiAPI = {
     role: string;
     conversationId?: string;
     hotelId?: string;
-  }) => api.post("/ai/assistant", payload, {
-    responseType: "stream",
-  }),
+  }) => { void payload; return v2Unavailable("AI assistant"); },
 };
 
 // ─── Oliv Finance (Supplier Factoring) ──────────────
 export const olivAPI = {
-   onboardSupplier: (data: Record<string, unknown>) =>
-     api.post("/oliv/onboard-supplier", data),
-   initiateFactoring: (data: Record<string, unknown>) =>
-     api.post("/oliv/initiate-factoring", data),
-   getKycStatus: () => api.get("/oliv/kyc-status"),
+   onboardSupplier: (_data: Record<string, unknown>) => v2Unavailable("Oliv supplier onboarding"),
+   initiateFactoring: (_data: Record<string, unknown>) => v2Unavailable("Oliv factoring initiation"),
+   getKycStatus: () => v2Unavailable("Oliv KYC status"),
  };
 
 // ─── Onboarding ─────────────────────────────────────
 export const onboardingAPI = {
-  getProgress: () => api.get("/onboarding/progress"),
-  updateStep: (stepKey: string, completed: boolean, data?: Record<string, unknown>) =>
-    api.post("/onboarding/progress", { stepKey, completed, data }),
+  getProgress: () => api.get("/onboarding"),
+  updateStep: (_stepKey: string, _completed: boolean, _data?: Record<string, unknown>) =>
+    v2Unavailable("Onboarding step updates"),
 };
 
 // ─── Fintech (Credit Facility + Factoring) ────────────
 export const fintechAPI = {
-  getCreditFacility: () => api.get("/fintech/oliv-facility"),
-  getFactoringHistory: () => api.get("/factoring/requests"),
-  getFactoringInvoices: () => api.get("/factoring/invoices"),
-  getCreditLines: () => api.get("/factoring/credit-lines"),
-  marketplaceOffers: () => api.get("/factoring/marketplace"),
-  inquireFactoring: (invoiceId: string) =>
-    api.post("/factoring/inquire", { invoiceId }),
-  triggerFunding: (invoiceId: string, partnerId: string) =>
-    api.post("/factoring/fund", { invoiceId, partnerId }),
+  getCreditFacility: () => api.get("/funding"),
+  getFactoringHistory: () => api.get("/funding"),
+  getFactoringInvoices: () => api.get("/funding"),
+  getCreditLines: () => api.get("/funding"),
+  marketplaceOffers: () => api.get("/funders"),
+  inquireFactoring: (_invoiceId: string) => v2Unavailable("Factoring inquiry"),
+  triggerFunding: (_invoiceId: string, _partnerId: string) => v2Unavailable("Factoring funding trigger"),
 };
 
 // ─── HOVIN Field Layer (live inbound orders, dock GRN, logistics, 48h cash-out) ──
@@ -285,28 +248,23 @@ export const fintechAPI = {
 export const fieldAPI = {
   // Live order inbox feed
   liveOrders: (params?: Record<string, string>) =>
-    api.get("/field/orders/live", { params }),
+    api.get("/orders", { params }),
   // One-tap status shift on a live PO (READY / IN_TRANSIT / DELIVERED)
   shiftStatus: (orderId: string, status: string) =>
-    api.post(`/field/orders/${orderId}/status`, { status }),
+    api.patch("/orders", { id: orderId, status }),
 
   // Dock scanner → GRN from a scanned barcode + auto credit-note generation
-  scanForGrn: (data: Record<string, unknown>) => api.post("/grn/scan", data),
-  createCreditNote: (data: Record<string, unknown>) =>
-    api.post("/grn/credit-note", data),
+  scanForGrn: (data: Record<string, unknown>) => api.post("/grn", data),
+  createCreditNote: (_data: Record<string, unknown>) => v2Unavailable("Credit-note creation"),
 
   // Logistics + GPS tracking + POD
-  logistics: (params?: Record<string, string>) =>
-    api.get("/logistics/tracking", { params }),
-  trackOrder: (orderId: string) => api.get(`/logistics/orders/${orderId}`),
-  reportPosition: (data: Record<string, unknown>) =>
-    api.post("/logistics/position", data),
+  logistics: (params?: Record<string, string>) => api.get("/shipments", { params }),
+  trackOrder: (orderId: string) => api.get("/shipments", { params: { orderId } }),
+  reportPosition: (_data: Record<string, unknown>) => v2Unavailable("Shipment position report"),
 
   // 48h early cash-out (reverse factoring on approved orders)
-  cashOutEligible: (params?: Record<string, string>) =>
-    api.get("/fintech/cashout/eligible", { params }),
-  cashOutRequest: (data: Record<string, unknown>) =>
-    api.post("/fintech/cashout", data),
+  cashOutEligible: (_params?: Record<string, string>) => v2Unavailable("Cash-out eligibility"),
+  cashOutRequest: (_data: Record<string, unknown>) => v2Unavailable("Cash-out request"),
 };
 
 // ─── Notifications ─────────────────────────────────
@@ -320,9 +278,7 @@ export interface ServerNotification {
 }
 
 export const notificationAPI = {
-  list: (params?: { unreadOnly?: boolean; type?: string }) =>
-    api.get("/notifications", { params }),
-  markRead: (id?: string) => api.post("/notifications/read", { id }),
-  registerPushToken: (token: string, platform: string) =>
-    api.post("/notifications/push-token", { token, platform }),
+  list: (_params?: { unreadOnly?: boolean; type?: string }) => v2Unavailable("Notifications"),
+  markRead: (_id?: string) => v2Unavailable("Notification updates"),
+  registerPushToken: (_token: string, _platform: string) => v2Unavailable("Push-token registration"),
 };
