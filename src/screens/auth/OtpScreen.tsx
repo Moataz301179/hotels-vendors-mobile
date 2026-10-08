@@ -26,7 +26,6 @@ import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
 import { normalizePhone } from "@/utils/phone";
 import { openOlivOnboarding } from "@/utils/olivLink";
-import { SupplierOnboardingBot } from "@/components/ai-assistant/supplier-onboarding-chatbot";
 
 const RESEND_SECONDS = 60;
 

@@ -64,6 +64,6 @@ module.exports = ({ config }) => ({
         projectId: "515fa26b-e2f5-4036-9d25-800081b76af9",
       },
     },
-    plugins: ["expo-font"],
+    plugins: ["expo-font", "expo-secure-store", "expo-web-browser"],
   },
 });
