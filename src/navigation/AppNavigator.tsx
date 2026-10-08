@@ -312,15 +312,7 @@ function ShippingTabs() {
 export default function AppNavigator() {
   const { isAuthenticated, role, isLoading } = useAuthStore();
 
-  // TEMPORARY PREVIEW BYPASS (dev only) — lets you see the app inside without logging in.
-  // Set PREVIEW_MODE to false to restore real auth. Set PREVIEW_ROLE to "HOTEL"/"SUPPLIER"/"SHIPPING"
-  // to preview each role's dashboards.
-  const PREVIEW_MODE = true;
-  const PREVIEW_ROLE = "HOTEL";
-  const authed = PREVIEW_MODE ? true : isAuthenticated;
-  const effRole: string | null = PREVIEW_MODE ? PREVIEW_ROLE : role;
-
-  if (isLoading && !PREVIEW_MODE) {
+  if (isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -331,7 +323,7 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={screenOptions}>
-        {!authed ? (
+        {!isAuthenticated ? (
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
@@ -339,7 +331,7 @@ export default function AppNavigator() {
             <Stack.Screen name="OtpLogin" component={OtpLoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: "Reset Password" }} />
           </>
-         ) : effRole === "SUPPLIER" ? (
+         ) : role === "SUPPLIER" ? (
           <>
             <Stack.Screen name="SupplierMain" component={SupplierTabs} options={{ headerShown: false }} />
             <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: "Order" }} />
@@ -347,7 +339,7 @@ export default function AppNavigator() {
             <Stack.Screen name="OnboardingProgress" component={OnboardingProgressScreen} options={{ title: "Your Progress" }} />
             <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: "Notifications" }} />
           </>
-         ) : effRole === "SHIPPING" ? (
+         ) : role === "SHIPPING" ? (
           <>
             <Stack.Screen name="ShippingMain" component={ShippingTabs} options={{ headerShown: false }} />
             <Stack.Screen name="PODScreen" component={PODScreen} options={{ title: "Proof of Delivery" }} />
