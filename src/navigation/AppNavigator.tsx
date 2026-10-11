@@ -13,7 +13,7 @@ import { useAuthStore } from "@/store/auth";
 import { useNotificationStore } from "@/store/notifications";
 import {
   Home, ShoppingBasket, Package, ShoppingCart, FileText,
-  LayoutDashboard, ClipboardList, Layers, BarChart3, User, Bot, Truck, Users, Radar,
+  LayoutDashboard, ClipboardList, Layers, BarChart3, User, Bot, Truck, Users,
 } from "lucide-react-native";
 
 // Auth screens
@@ -60,11 +60,6 @@ import DriverDeliveryScreen from "@/screens/shipping/DriverDeliveryScreen";
 import PODScreen from "@/screens/shipping/PODScreen";
 
 // HOVIN Field layer screens (dispatcher / supplier on the ground)
-import FieldHubScreen from "@/screens/field/FieldHubScreen";
-import LiveOrderInboxScreen from "@/screens/field/LiveOrderInboxScreen";
-import DockScannerScreen from "@/screens/field/DockScannerScreen";
-import LogisticsTrackingScreen from "@/screens/field/LogisticsTrackingScreen";
-import CashOutScreen from "@/screens/field/CashOutScreen";
 
 // Onboarding
 import OnboardingProgressScreen from "@/screens/OnboardingProgressScreen";
@@ -73,7 +68,6 @@ import CategoryGridDemoScreen from "@/screens/CategoryGridDemoScreen";
 const Stack = createNativeStackNavigator();
 const FinanceStackNav = createNativeStackNavigator();
 const HotelFinanceStackNav = createNativeStackNavigator();
-const FieldStackNav = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const screenOptions = {
@@ -173,18 +167,6 @@ function FinanceStack() {
   );
 }
 
-function FieldStack() {
-  return (
-    <FieldStackNav.Navigator screenOptions={stackScreenOptions}>
-      <FieldStackNav.Screen name="FieldHub" component={FieldHubScreen} options={{ title: "Field" }} />
-      <FieldStackNav.Screen name="FieldLiveOrders" component={LiveOrderInboxScreen} options={{ title: "Live Order Inbox" }} />
-      <FieldStackNav.Screen name="FieldDockScanner" component={DockScannerScreen} options={{ title: "Dock Scanner" }} />
-      <FieldStackNav.Screen name="FieldLogistics" component={LogisticsTrackingScreen} options={{ title: "Logistics & GPS" }} />
-      <FieldStackNav.Screen name="FieldCashOut" component={CashOutScreen} options={{ title: "48h Cash-Out" }} />
-    </FieldStackNav.Navigator>
-  );
-}
-
 function SupplierTabs() {
   return (
     <Tab.Navigator
@@ -219,13 +201,6 @@ function SupplierTabs() {
         options={{
           title: "Orders", tabBarLabel: "Orders",
           tabBarIcon: ({ color, size }) => <ClipboardList size={size} color={color} />,
-        }}
-      />
-      <Tab.Screen
-        name="FieldTab" component={FieldStack}
-        options={{
-          title: "Field", tabBarLabel: "Field",
-          tabBarIcon: ({ color, size }) => <Radar size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -292,10 +267,6 @@ function ShippingTabs() {
       <Tab.Screen
         name="DeliveriesTab" component={DriverDeliveryScreen}
         options={{ title: "My Deliveries", tabBarLabel: "Deliveries", tabBarIcon: ({ color, size }) => <Truck size={size} color={color} /> }}
-      />
-      <Tab.Screen
-        name="FieldTab" component={FieldStack}
-        options={{ title: "Field", tabBarLabel: "Field", tabBarIcon: ({ color, size }) => <Radar size={size} color={color} /> }}
       />
       <Tab.Screen
         name="ProfileTab" component={ProfileScreen}

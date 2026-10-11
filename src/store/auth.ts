@@ -7,6 +7,7 @@ import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { authAPI, type RegisterPayload } from "../api";
 import type { User, UserRole } from "../types";
+import { useCartStore } from "./cart";
 
 interface AuthState {
   user: User | null;
@@ -68,15 +69,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try { await authAPI.logout(); } catch {}
     await SecureStore.deleteItemAsync("access_token");
     await SecureStore.deleteItemAsync("refresh_token");
+    useCartStore.getState().clearCart();
     set({ user: null, role: null, isAuthenticated: false });
   },
 
   loadUser: async () => {
     try {
       const { data } = await authAPI.me();
-      if (data.success && data.data) {
-        set({ user: data.data, role: platformRoleOf(data.data), isAuthenticated: true });
+      // The active /api/v2/me contract returns { user }, while older API
+      // releases returned { success, data }. Accept both, but never infer a
+      // signed-in app identity from the Clerk token alone.
+      const userData = data?.user ?? data?.data?.user ?? data?.data;
+      const platformRole = userData?.platformRole ?? userData?.role;
+      const allowedRoles: UserRole[] = ["HOTEL", "SUPPLIER", "SHIPPING", "FACTORING", "ADMIN"];
+      if (!userData?.id || !userData?.email || !userData?.tenantId || !allowedRoles.includes(platformRole)) {
+        throw new Error("The account profile response is incomplete or unsupported.");
       }
+      const user = { ...userData, role: userData.role ?? platformRole, platformRole } as User;
+      set({ user, role: platformRoleOf(user), isAuthenticated: true });
     } catch {
       set({ user: null, isAuthenticated: false });
     }
@@ -98,7 +108,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
     set({ isLoading: true });
-    await get().loadUser();
+    // SSO activation and token minting are asynchronous. Retry the tenant
+    // profile briefly instead of returning to login while Clerk propagates.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await get().loadUser();
+      if (get().isAuthenticated) break;
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 500));
+    }
     set({ isLoading: false });
   },
 }));

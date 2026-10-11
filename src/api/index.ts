@@ -4,7 +4,6 @@
  */
 
 import axios, { type AxiosResponse } from "axios";
-import * as SecureStore from "expo-secure-store";
 import { getClerkToken } from "./clerk-token";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL || "https://www.hotelsvendors.com";
@@ -18,10 +17,11 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Clerk is the source of truth for native sessions. The SecureStore fallback
-// remains only for legacy screens until they are migrated to Clerk flows.
+// Clerk is the only mobile session authority. Never fall back to a persisted
+// legacy token: a token from another account or tenant must not become a
+// silent second authentication path.
 api.interceptors.request.use(async (config) => {
-  const token = (await getClerkToken()) || await SecureStore.getItemAsync("access_token");
+  const token = await getClerkToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
