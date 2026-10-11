@@ -1,6 +1,6 @@
 /**
  * Splash Screen — animated 3D-feel monogram + initialization steps
- * Dribbble-style dark institutional loading intro (HOVIN identity).
+ * HotelsVendors loading intro.
  */
 
 import React, { useEffect, useState } from "react";
@@ -54,7 +54,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
 
       <View style={styles.logoWrap}>
         {/* No logo stamp — clean text-only brand on the loading frame */}
-        <Text style={styles.brandName}>HOVIN</Text>
+        <Text style={styles.brandName}>HOTELSVENDORS</Text>
         <Text style={styles.logoTagline}>Digital Procurement Hub</Text>
       </View>
       <Text style={styles.byline}>A Hotels Vendors application</Text>

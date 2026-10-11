@@ -59,7 +59,6 @@ import FactoringOfferDetailScreen from "@/screens/supplier/FactoringOfferDetailS
 import DriverDeliveryScreen from "@/screens/shipping/DriverDeliveryScreen";
 import PODScreen from "@/screens/shipping/PODScreen";
 
-// HOVIN Field layer screens (dispatcher / supplier on the ground)
 
 // Onboarding
 import OnboardingProgressScreen from "@/screens/OnboardingProgressScreen";
@@ -107,7 +106,7 @@ function HotelTabs() {
     >
       <Tab.Screen
         name="Home" component={HotelHomeScreen}
-        options={{ title: "HOVIN", tabBarLabel: "Home", tabBarIcon: ({ color, size }) => <Home size={size} color={color} /> }}
+        options={{ title: "HotelsVendors", tabBarLabel: "Home", tabBarIcon: ({ color, size }) => <Home size={size} color={color} /> }}
       />
       <Tab.Screen
         name="CatalogTab" component={CatalogScreen}

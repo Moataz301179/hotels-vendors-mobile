@@ -49,14 +49,14 @@ export default function LoginScreen({ navigation }: any) {
         <View style={styles.header}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.sm }}>
             <Led color={colors.gold} />
-            <Text style={styles.logoWord}>HOVIN</Text>
+            <Text style={styles.logoWord}>HOTELSVENDORS</Text>
           </View>
           <Text style={styles.tagline}>Digital Procurement Hub</Text>
           <Text style={styles.byline}>A Hotels Vendors application</Text>
         </View>
 
                 <View style={styles.form}>
-          <Panel tag="AUTH // HOVIN" style={{ padding: spacing.lg }}>
+          <Panel tag="AUTH // HOTELSVENDORS" style={{ padding: spacing.lg }}>
             <Text style={styles.label}>Email or Mobile Number</Text>
             <TextInput
               style={styles.input}
@@ -101,7 +101,7 @@ export default function LoginScreen({ navigation }: any) {
           </Panel>
         </View>
 
-        <Text style={styles.trust}>SECURE SIGN-IN // ETA-COMPLIANT HOVIN</Text>
+        <Text style={styles.trust}>SECURE SIGN-IN // HOTELSVENDORS</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

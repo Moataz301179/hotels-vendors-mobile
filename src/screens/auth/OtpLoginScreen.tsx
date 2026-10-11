@@ -33,7 +33,7 @@ export default function OtpLoginScreen({ navigation }: any) {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.logoWord}>HOVIN</Text>
+          <Text style={styles.logoWord}>HOTELSVENDORS</Text>
           <Text style={styles.title}>Sign in with mobile</Text>
           <Text style={styles.subtext}>
             We'll text you a 6-digit code. Your number must be registered to the
