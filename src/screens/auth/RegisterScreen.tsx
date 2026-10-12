@@ -2,16 +2,17 @@
  * Register Screen
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView,
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
 import type { UserRole } from "@/types";
-import { isValidEgyptianPhone, normalizePhone } from "@/utils/phone";
-import PhoneInput from "@/components/PhoneInput";
-import { Zap } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth, useSignUp, useSSO } from "@clerk/expo";
+import { makeRedirectUri } from "expo-auth-session";
+import HovinWordmark from "@/components/HovinWordmark";
 
 const ROLES: { value: UserRole; label: string; desc: string }[] = [
   { value: "HOTEL", label: "Hotel Buyer", desc: "Browse & order supplies" },
@@ -19,42 +20,142 @@ const ROLES: { value: UserRole; label: string; desc: string }[] = [
 ];
 
 export default function RegisterScreen({ navigation }: any) {
+  const redirectUrl = makeRedirectUri({ scheme: "hovin", path: "sso-callback" });
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("HOTEL");
-  const { isLoading } = useAuthStore();
+  const insets = useSafeAreaInsets();
+  const { isLoading, loadUser } = useAuthStore();
+  const { isSignedIn } = useAuth();
+  const { signUp, fetchStatus } = useSignUp();
+  const { startSSOFlow } = useSSO();
+  type PendingSignUp = NonNullable<Awaited<ReturnType<typeof startSSOFlow>>["signUp"]>;
+  type PendingSso = { signUp: PendingSignUp; setActive: NonNullable<Awaited<ReturnType<typeof startSSOFlow>>["setActive"]> };
+  const [pendingSso, setPendingSso] = useState<PendingSso | null>(null);
 
-  const handleSendCode = () => {
-    if (!name || !password) {
-      Alert.alert("Error", "Full name and password are required");
+  useEffect(() => {
+    if (isSignedIn) void loadUser();
+  }, [isSignedIn, loadUser]);
+
+  if (isSignedIn) {
+    return <View style={[styles.container, { justifyContent: "center", alignItems: "center", padding: spacing.xl }]}><ActivityIndicator color={colors.primaryDark} /><Text style={[styles.brandTagline, { marginTop: spacing.md }]}>Restoring your workspace…</Text></View>;
+  }
+
+  const handleSendCode = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedUsername = username.trim();
+    const nameParts = name.trim().split(/\s+/).filter(Boolean);
+    if (!nameParts.length || !normalizedUsername || !normalizedEmail || !password) {
+      Alert.alert("Required details", "Name, username, email address and password are required.");
       return;
     }
-    if (password.length < 8) {
-      Alert.alert("Error", "Password must be at least 8 characters");
+    if (normalizedUsername.length < 6 || normalizedUsername.length > 64) {
+      Alert.alert("Username not accepted", "Choose a username between 6 and 64 characters.");
       return;
     }
-    if (!isValidEgyptianPhone(phone)) {
-      Alert.alert("Invalid Number", "Enter a valid Egyptian mobile number, e.g. 0101 234 5678");
+    if (password.length < 15) {
+      Alert.alert("Password too short", "Use at least 15 characters for your password.");
       return;
     }
-    navigation.navigate("Otp", {
-      mode: "register",
-      phone: normalizePhone(phone),
-      name,
-      email: email.trim() || undefined,
-      password,
-      role,
-      creditInterest: true, // Oliv credit onboarding is a compulsory step (no choice yet — only offering)
-    });
+    try {
+      const result = await signUp.create({
+        emailAddress: normalizedEmail,
+        username: normalizedUsername,
+        password,
+        firstName: nameParts[0],
+        lastName: nameParts.slice(1).join(" ") || undefined,
+        unsafeMetadata: { platformRole: role },
+      });
+      if (result.error) throw new Error(result.error.message || "Could not create account");
+      navigation.navigate("Otp", { mode: "register", email: normalizedEmail, role });
+    } catch (err: any) {
+      Alert.alert("Sign-up failed", err.message || "Could not create account");
+    }
+  };
+
+  const handleGoogle = async () => {
+    try {
+      if (isSignedIn) {
+        await loadUser();
+        return;
+      }
+      const result = await startSSOFlow({ strategy: "oauth_google", redirectUrl, unsafeMetadata: { platformRole: role } });
+      if (result.createdSessionId) {
+        await result.setActive?.({ session: result.createdSessionId });
+      } else if (result.signIn?.status === "complete" && result.signIn.createdSessionId) {
+        await result.setActive?.({ session: result.signIn.createdSessionId });
+      } else if (result.signUp?.status === "missing_requirements") {
+        if (!result.setActive) throw new Error("Could not activate the completed Clerk session");
+        setPendingSso({ signUp: result.signUp, setActive: result.setActive });
+      } else if (result.authSessionResult?.type !== "cancel" && result.authSessionResult?.type !== "dismiss") {
+        throw new Error("Google sign-up did not complete");
+      }
+    } catch (err: any) {
+      if (isSignedIn || /already signed in/i.test(String(err?.message))) {
+        await loadUser();
+        return;
+      }
+      Alert.alert("Google sign-up failed", err.message || "Please try again");
+    }
+  };
+
+  const handleApple = async () => {
+    try {
+      if (isSignedIn) {
+        await loadUser();
+        return;
+      }
+      const result = await startSSOFlow({ strategy: "oauth_apple", redirectUrl, unsafeMetadata: { platformRole: role } });
+      if (result.createdSessionId) {
+        await result.setActive?.({ session: result.createdSessionId });
+      } else if (result.signIn?.status === "complete" && result.signIn.createdSessionId) {
+        await result.setActive?.({ session: result.signIn.createdSessionId });
+      } else if (result.signUp?.status === "missing_requirements") {
+        if (!result.setActive) throw new Error("Could not activate the completed Clerk session");
+        setPendingSso({ signUp: result.signUp, setActive: result.setActive });
+      } else if (result.authSessionResult?.type !== "cancel" && result.authSessionResult?.type !== "dismiss") {
+        throw new Error("Apple sign-up did not complete");
+      }
+    } catch (err: any) {
+      if (isSignedIn || /already signed in/i.test(String(err?.message))) {
+        await loadUser();
+        return;
+      }
+      Alert.alert("Apple sign-up failed", err.message || "Please try again");
+    }
+  };
+
+  const completeSsoSignUp = async () => {
+    if (!pendingSso) return;
+    const normalizedUsername = username.trim();
+    if (normalizedUsername.length < 6 || normalizedUsername.length > 64) {
+      Alert.alert("Username not accepted", "Choose a username between 6 and 64 characters.");
+      return;
+    }
+    try {
+      const updated = await pendingSso.signUp.update({ username: normalizedUsername });
+      if (updated.status !== "complete" || !updated.createdSessionId) {
+        Alert.alert("More details needed", `Clerk still requires: ${updated.missingFields.join(", ") || "additional verification"}.`);
+        return;
+      }
+      await pendingSso.setActive({ session: updated.createdSessionId });
+      setPendingSso(null);
+      await useAuthStore.getState().loadUser();
+    } catch (err: any) {
+      Alert.alert("Sign-up incomplete", err.message || "Please check your username and try again");
+    }
   };
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-      <Image source={require("../../../assets/images/auth-bg.jpg")} style={styles.bgImage} resizeMode="cover" />
-      <View style={styles.bgOverlay} />
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: insets.top + spacing.xl, paddingBottom: insets.bottom + spacing.xl }]} keyboardShouldPersistTaps="handled">
+        <View nativeID="clerk-captcha" style={styles.captchaMount} />
+        <View style={styles.brand}>
+          <HovinWordmark size={30} />
+          <Text style={styles.brandTagline}>Digital Procurement Hub</Text>
+        </View>
         <Text style={styles.title}>Create Account</Text>
 
         <Text style={styles.roleTitle}>I'm joining as</Text>
@@ -71,34 +172,40 @@ export default function RegisterScreen({ navigation }: any) {
           ))}
         </View>
 
+        <TouchableOpacity style={styles.googleButton} onPress={handleGoogle} disabled={fetchStatus === "fetching"}>
+          {fetchStatus === "fetching" ? <ActivityIndicator color={colors.text} /> : <Text style={styles.googleText}>Continue with Google</Text>}
+        </TouchableOpacity>
+        {Platform.OS === "ios" && (
+          <TouchableOpacity style={styles.googleButton} onPress={handleApple} disabled={fetchStatus === "fetching"}>
+            <Text style={styles.googleText}>Continue with Apple</Text>
+          </TouchableOpacity>
+        )}
+        {pendingSso && (
+          <View style={styles.form}>
+            <Text style={styles.label}>Choose a username to finish sign-up</Text>
+            <TextInput style={styles.input} value={username} onChangeText={setUsername} placeholderTextColor={colors.textMuted} placeholder="At least 6 characters" autoCapitalize="none" autoCorrect={false} />
+            <TouchableOpacity style={styles.button} onPress={completeSsoSignUp} disabled={fetchStatus === "fetching"}>
+              <Text style={styles.buttonText}>Finish account setup</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        <Text style={styles.orLabel}>or create an account with your verified email</Text>
+
         <View style={styles.form}>
           <Text style={styles.label}>Full Name</Text>
           <TextInput style={styles.input} value={name} onChangeText={setName} placeholderTextColor={colors.textMuted} placeholder="John Doe" />
 
-          <Text style={styles.label}>Mobile Number</Text>
-          <PhoneInput value={phone} onChangeText={setPhone} fontSize={15} />
+          <Text style={styles.label}>Username</Text>
+          <TextInput style={styles.input} value={username} onChangeText={setUsername} placeholderTextColor={colors.textMuted} placeholder="At least 6 characters" autoCapitalize="none" autoCorrect={false} />
 
-          <Text style={styles.label}>Email (optional)</Text>
-          <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholderTextColor={colors.textMuted} placeholder="you@company.com" keyboardType="email-address" autoCapitalize="none" />
+          <Text style={styles.label}>Email address</Text>
+          <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholderTextColor={colors.textMuted} placeholder="you@company.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
 
           <Text style={styles.label}>Password</Text>
-          <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholderTextColor={colors.textMuted} placeholder="Min 8 characters" secureTextEntry />
+          <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholderTextColor={colors.textMuted} placeholder="At least 15 characters" secureTextEntry autoCapitalize="none" autoCorrect={false} />
 
-          {/* Oliv credit onboarding — COMPULSORY step (no choice): it's the only
-              offering until the real catalog goes live, so every new user is
-              onboarded for financing as part of signup (feeds CHV000 revenue). */}
-          <View style={styles.creditCard}>
-            <View style={styles.creditTextWrap}>
-              <Text style={styles.creditTitle}>⚡ Included: Instant Credit Onboarding</Text>
-              <Text style={styles.creditDesc}>Your account includes pre-qualification for up to EGP 10M working capital via Oliv Finance — 48h payout, no collateral. You'll finish this secure step right after verification.</Text>
-            </View>
-            <View style={[styles.checkbox, styles.checkboxOn]}>
-              <Text style={styles.checkmark}>✓</Text>
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.button} onPress={handleSendCode} disabled={isLoading}>
-            {isLoading ? <ActivityIndicator color={colors.bg} /> : <Text style={styles.buttonText}>Verify Mobile & Continue</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleSendCode} disabled={isLoading || fetchStatus === "fetching"}>
+            {isLoading || fetchStatus === "fetching" ? <ActivityIndicator color={colors.bg} /> : <Text style={styles.buttonText}>Verify email & continue</Text>}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -111,11 +218,13 @@ export default function RegisterScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  captchaMount: { minHeight: 0 },
   container: { flex: 1, backgroundColor: colors.bg },
   bgImage: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
-  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(10,14,26,0.88)" },
   scroll: { flexGrow: 1, padding: spacing.xl, paddingTop: 60 },
   title: { ...typography.h1, color: colors.text, marginBottom: spacing.xl },
+  brand: { alignItems: "center", marginBottom: spacing.xl },
+  brandTagline: { ...typography.caption, color: colors.textMuted, marginTop: spacing.xs },
   roleTitle: { ...typography.label, color: colors.textSecondary, marginBottom: spacing.sm },
   roleRow: { flexDirection: "row", gap: spacing.md, marginBottom: spacing.xl },
   roleCard: {
@@ -132,20 +241,8 @@ const styles = StyleSheet.create({
   input: { backgroundColor: colors.bgInput, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md, padding: spacing.lg, color: colors.text, fontSize: 15 },
   button: { backgroundColor: colors.primary, borderRadius: radii.md, padding: spacing.lg, alignItems: "center", marginTop: spacing.md },
   buttonText: { color: colors.bg, fontWeight: "600", fontSize: 16 },
+  googleButton: { borderWidth: 1, borderColor: colors.borderLight, borderRadius: radii.md, padding: spacing.lg, alignItems: "center", marginTop: spacing.sm },
+  googleText: { color: colors.text, fontWeight: "600", fontSize: 15 },
+  orLabel: { ...typography.caption, color: colors.textMuted, textAlign: "center", marginVertical: spacing.md },
   link: { color: colors.primary, textAlign: "center", marginTop: spacing.lg, ...typography.bodySmall },
-  creditCard: {
-    flexDirection: "row", alignItems: "center", gap: spacing.md,
-    backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.primary,
-    borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.md,
-  },
-  creditTextWrap: { flex: 1, gap: 4 },
-  creditTitle: { ...typography.bodySmall, color: colors.gold, fontWeight: "700" },
-  creditDesc: { ...typography.caption, color: colors.textSecondary, lineHeight: 16 },
-  checkbox: {
-    width: 26, height: 26, borderRadius: 8, borderWidth: 1.5,
-    borderColor: colors.borderLight, backgroundColor: colors.bgInput,
-    alignItems: "center", justifyContent: "center",
-  },
-  checkboxOn: { borderColor: colors.gold, backgroundColor: colors.gold },
-  checkmark: { color: colors.bg, fontWeight: "800", fontSize: 15 },
 });

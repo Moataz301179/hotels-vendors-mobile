@@ -13,6 +13,7 @@ interface AuthState {
   role: UserRole | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  authError: string | null;
 
   login: (identifier: string, password: string) => Promise<void>;
   register: (data: RegisterPayload) => Promise<void>;
@@ -34,8 +35,11 @@ function platformRoleOf(user: User): UserRole {
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   role: null,
-  isLoading: false,
+  // Start in sync mode so an already-active Clerk session cannot briefly
+  // render a second sign-in/sign-up surface before AppContent hydrates it.
+  isLoading: true,
   isAuthenticated: false,
+  authError: null,
 
   login: async (identifier: string, password: string) => {
     void identifier;
@@ -74,11 +78,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loadUser: async () => {
     try {
       const { data } = await authAPI.me();
-      if (data.success && data.data) {
-        set({ user: data.data, role: platformRoleOf(data.data), isAuthenticated: true });
+      // The active /api/v2/me contract returns { user }, while older API
+      // releases returned { success, data }. Accept both, but never infer a
+      // signed-in app identity from the Clerk token alone.
+      const userData = data?.user ?? data?.data?.user ?? data?.data;
+      const platformRole = userData?.platformRole ?? userData?.role;
+      const allowedRoles: UserRole[] = ["HOTEL", "SUPPLIER", "SHIPPING", "FACTORING", "ADMIN"];
+      if (
+        !userData?.id ||
+        !userData?.email ||
+        !userData?.tenantId ||
+        !allowedRoles.includes(platformRole)
+      ) {
+        throw new Error("The account profile response is incomplete or unsupported.");
       }
-    } catch {
-      set({ user: null, isAuthenticated: false });
+
+      const user = {
+        ...userData,
+        role: userData.role ?? platformRole,
+        platformRole,
+      } as User;
+      set({ user, role: platformRoleOf(user), isAuthenticated: true, authError: null });
+    } catch (error: any) {
+      // Keep Clerk's session intact while the backend finishes provisioning.
+      // The navigator can now show the actionable backend error instead of a
+      // permanent, unexplained workspace deadlock.
+      set({ user: null, role: null, isAuthenticated: false, authError: error?.message || "Workspace setup is still being finalized." });
     }
   },
 
@@ -94,11 +119,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
     if (!isSignedIn) {
-      set({ user: null, role: null, isAuthenticated: false, isLoading: false });
+      set({ user: null, role: null, isAuthenticated: false, isLoading: false, authError: null });
       return;
     }
     set({ isLoading: true });
-    await get().loadUser();
+    // SSO session activation and token minting are asynchronous. Retry the
+    // tenant profile fetch briefly instead of dropping the user back at login
+    // while Clerk is still propagating the new session.
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      await get().loadUser();
+      if (get().isAuthenticated) break;
+      if (attempt < 7) await new Promise((resolve) => setTimeout(resolve, Math.min(500 * 2 ** attempt, 4000)));
+    }
     set({ isLoading: false });
   },
 }));

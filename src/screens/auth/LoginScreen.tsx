@@ -2,7 +2,7 @@
  * Login Screen
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth, useSignIn, useSSO } from "@clerk/expo";
 import { makeRedirectUri } from "expo-auth-session";
 import {
@@ -28,6 +28,14 @@ export default function LoginScreen({ navigation }: any) {
   type PendingSso = { signUp: PendingSignUp; setActive: NonNullable<Awaited<ReturnType<typeof startSSOFlow>>["setActive"]> };
   const [pendingSso, setPendingSso] = useState<PendingSso | null>(null);
   const isLoading = fetchStatus === "fetching";
+
+  useEffect(() => {
+    if (isSignedIn) void loadUser();
+  }, [isSignedIn, loadUser]);
+
+  if (isSignedIn) {
+    return <View style={[styles.container, { justifyContent: "center", alignItems: "center", padding: spacing.xl }]}><ActivityIndicator color={colors.primaryDark} /><Text style={[styles.byline, { marginTop: spacing.md }]}>Restoring your workspace…</Text></View>;
+  }
 
   const handleLogin = async () => {
     if (!identifier.trim() || !password) {
