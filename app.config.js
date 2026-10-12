@@ -3,25 +3,27 @@ module.exports = ({ config }) => ({
   expo: {
     owner: "hotelsvendors.com",
     name: "HOVIN",
-    slug: "invo",
+    slug: "hovin",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
-    userInterfaceStyle: "automatic",
-    scheme: "invo",
+    userInterfaceStyle: "light",
+    scheme: "hovin",
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.hotelsvendors.hovin",
       associatedDomains: ["applinks:hotelsvendors.com"],
+      entitlements: {
+        "keychain-access-groups": ["$(AppIdentifierPrefix)$(CFBundleIdentifier)"],
+      },
       infoPlist: {
         NSCameraUsageDescription: "HOVIN needs camera access to photograph invoices for financing.",
         NSPhotoLibraryUsageDescription: "HOVIN needs photo library access to select invoice images.",
         NSUserNotificationUsageDescription: "HOVIN needs permission to send you order and payment updates.",
         NSAppleEventsUsageDescription: "HOVIN needs permission to handle payment callback links.",
         ITSAppUsesNonExemptEncryption: false,
-        // Oliv + ETA deep link schemes
         CFBundleURLTypes: [
-          { CFBundleURLSchemes: ["invo", "oliv", "eta"] },
+          { CFBundleURLSchemes: ["hovin", "eta"] },
         ],
       },
     },
@@ -42,14 +44,12 @@ module.exports = ({ config }) => ({
         "VIBRATE",
       ],
       predictiveBackGestureEnabled: true,
-      // Oliv + ETA deep links for Android
       intentFilters: [
         {
           action: "VIEW",
           autoVerify: true,
           data: [
-            { scheme: "invo", host: "*", pathPrefix: "/" },
-            { scheme: "oliv", host: "*", pathPrefix: "/" },
+            { scheme: "hovin", host: "*", pathPrefix: "/" },
             { scheme: "eta", host: "*", pathPrefix: "/" },
           ],
           category: ["BROWSABLE", "DEFAULT"],

@@ -1,56 +1,53 @@
 /**
  * HOVIN Mobile — Design Tokens (hotelsvendors.com/hotels/join palette)
  *
- * MOBILE IS DARK THEME (user-agreed), sourced from the live /hotels/join page:
- *   · Dark grey-black surfaces: bg #0B0F14 · raised #16161f · deep #15151e
- *   · GOLD #c8a86b (accent gold #8a6d3b) — headings, icons, accents
- *   · GREEN #314B43 — buttons, pills, brand surfaces
- *   · BEIGE #ABA294 — secondary accent / checkmarks
- *   · WHITE text on dark. Grey text: rgba(255,255,255,0.55-0.80)
+ * APPLE-STYLE LIGHT THEME: white, grey, light blue and black.
+ * The mobile app shares the web shell palette; dark theme values are not
+ * part of the current product direction.
  */
 
 export const colors = {
-  // Brand primaries (join-page palette)
-  gold: "#c8a86b",
-  goldDark: "#8a6d3b",
-  green: "#314B43",
-  greenDark: "#24382E",
-  beige: "#ABA294",
-  grey: "#646367",
+  // Brand primaries
+  gold: "#1d1d1f",
+  goldDark: "#6e6e73",
+  green: "#8fc4f2",
+  greenDark: "#6fa7e6",
+  beige: "#6e6e73",
+  grey: "#6e6e73",
 
   // Dark grey-black surfaces (join page)
-  bgDeep: "#15151e",
-  bg: "#0B0F14",           // dominant dark background
-  bgRaised: "#16161f",     // card surface
-  bgCard: "#16161f",
-  bgCardHover: "#1e1e28",
-  bgInput: "rgba(255,255,255,0.08)",
-  bgModal: "rgba(11,15,20,0.98)",
+  bgDeep: "#f2f2f7",
+  bg: "#ffffff",
+  bgRaised: "#f5f5f7",
+  bgCard: "#ffffff",
+  bgCardHover: "#eef6ff",
+  bgInput: "#ffffff",
+  bgModal: "rgba(255,255,255,0.98)",
 
   // Brand accent "primary" surface
-  primary: "#c8a86b",
-  primaryDark: "#8a6d3b",
-  primaryMuted: "rgba(200,168,107,0.18)",
+  primary: "#9dc5ff",
+  primaryDark: "#6fa7e6",
+  primaryMuted: "#e5f1ff",
 
-  accent: "#ABA294",
-  accentLight: "#C7BFB1",
-  accentMuted: "rgba(171,162,148,0.16)",
+  accent: "#d1d1d6",
+  accentLight: "#f2f2f7",
+  accentMuted: "#eef6ff",
 
   // Light-mode inverse — used for root/chrome when light scheme is active
-  bgLight: "#F3F1EC",
-  textLight: "#24382E",
+  bgLight: "#ffffff",
+  textLight: "#1d1d1f",
 
   // Borders (white-alpha so they read on dark)
-  border: "rgba(255,255,255,0.14)",
-  borderLight: "rgba(255,255,255,0.22)",
+  border: "#d1d1d6",
+  borderLight: "#b8c9d9",
 
   // Text — WHITE on the dark background
-  text: "#FFFFFF",
-  textSecondary: "rgba(255,255,255,0.80)",
-  textMuted: "rgba(255,255,255,0.55)",
+  text: "#1d1d1f",
+  textSecondary: "#3c3c43",
+  textMuted: "#6e6e73",
 
   // Heading text color
-  head: "#F2F4F7",
+  head: "#1d1d1f",
 
   // Status (semantic only, never brand)
   success: "#059669",
@@ -65,8 +62,8 @@ export const colors = {
   disbursed: "#E2E4E9",
 
   // Tab bar
-  tabBg: "rgba(11,15,20,0.96)",
-  tabBorder: "rgba(255,255,255,0.12)",
+  tabBg: "#f2f2f7",
+  tabBorder: "#d1d1d6",
 } as const;
 
 export const spacing = {

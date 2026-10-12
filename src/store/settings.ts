@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export type ColorMode = "light" | "dark" | "system";
 
 export const COLOR_MODE_STORAGE_KEY = "invoh_settings_colorMode";
-export const DEFAULT_COLOR_MODE: ColorMode = "system";
+export const DEFAULT_COLOR_MODE: ColorMode = "light";
 
 interface SettingsState {
   colorMode: ColorMode;
@@ -19,19 +19,16 @@ interface SettingsState {
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   colorMode: DEFAULT_COLOR_MODE,
-  setColorMode: (mode) => {
-    set({ colorMode: mode });
-    AsyncStorage.setItem(COLOR_MODE_STORAGE_KEY, mode).catch(() => {});
+  setColorMode: () => {
+    set({ colorMode: "light" });
+    AsyncStorage.setItem(COLOR_MODE_STORAGE_KEY, "light").catch(() => {});
   },
   hydrate: async () => {
     try {
       const stored = await AsyncStorage.getItem(COLOR_MODE_STORAGE_KEY);
       const valid = stored === "light" || stored === "dark" || stored === "system";
-      if (valid) {
-        set({ colorMode: stored as ColorMode });
-      } else {
-        set({ colorMode: DEFAULT_COLOR_MODE });
-      }
+      // Migrate old system/dark preferences to the current light-only theme.
+      set({ colorMode: valid && stored === "light" ? "light" : DEFAULT_COLOR_MODE });
     } catch {
       set({ colorMode: DEFAULT_COLOR_MODE });
     }
