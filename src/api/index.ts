@@ -6,7 +6,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-const API_BASE = "https://www.hotelsvendors.com";
+const API_BASE = (process.env.EXPO_PUBLIC_API_URL || "https://www.hotelsvendors.com").replace(/\/$/, "");
 
 const api = axios.create({
   baseURL: `${API_BASE}/api/v1`,
@@ -49,7 +49,6 @@ function backendErrorMessage(error: any): string | null {
 // Normalize a rejected axios error into one with a friendly user-facing message.
 function friendlyError(error: any): any {
   if (!error?.response) {
-    // Network / timeout / no response.
     if (error?.code === "ECONNABORTED") {
       error.message = "The request took too long. Please check your connection and try again.";
     } else if (!error?.request) {
@@ -62,7 +61,6 @@ function friendlyError(error: any): any {
   const status = error.response.status;
   const backend = backendErrorMessage(error);
   if (backend && status !== 401 && status !== 403) {
-    // Prefer the backend's specific message (validation, rate-limit text, etc.).
     error.message = backend;
   } else {
     error.message = statusMessages[status] || `Something went wrong (${status}). Please try again.`;
@@ -70,40 +68,52 @@ function friendlyError(error: any): any {
   return error;
 }
 
-// Handle 401 → try refresh
+// One rotation per concurrent request batch: refresh credentials are single-use.
+let refreshInFlight: Promise<string> | null = null;
+function refreshedAccessToken(): Promise<string> {
+  if (!refreshInFlight) {
+    refreshInFlight = (async () => {
+      try {
+        const refreshToken = await SecureStore.getItemAsync("refresh_token");
+        if (!refreshToken) throw new Error("Sign in again");
+        const { data } = await axios.post(`${API_BASE}/api/v1/auth/refresh`, { refreshToken });
+        if (!data.success || !data.data?.accessToken || !data.data?.refreshToken) throw new Error("Sign in again");
+        await SecureStore.setItemAsync("refresh_token", data.data.refreshToken);
+        await SecureStore.setItemAsync("access_token", data.data.accessToken);
+        return data.data.accessToken as string;
+      } catch (cause) {
+        await SecureStore.deleteItemAsync("access_token");
+        await SecureStore.deleteItemAsync("refresh_token");
+        throw cause;
+      } finally {
+        refreshInFlight = null;
+      }
+    })();
+  }
+  return refreshInFlight;
+}
+
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
+    const authEndpoint = original?.url?.startsWith("/auth/") && !["/auth/me", "/auth/logout"].includes(original.url);
+    if (error.response?.status === 401 && original && !original._retry && !authEndpoint) {
       original._retry = true;
       try {
-        const refreshToken = await SecureStore.getItemAsync("refresh_token");
-        if (refreshToken) {
-          const { data } = await axios.post(`${API_BASE}/api/v1/auth/refresh`, {
-            refreshToken,
-          });
-          if (data.success && data.data?.accessToken) {
-            await SecureStore.setItemAsync("access_token", data.data.accessToken);
-            if (data.data.refreshToken) {
-              await SecureStore.setItemAsync("refresh_token", data.data.refreshToken);
-            }
-            original.headers.Authorization = `Bearer ${data.data.accessToken}`;
-            return api(original);
-          }
-        }
-      } catch {
-        await SecureStore.deleteItemAsync("access_token");
-        await SecureStore.deleteItemAsync("refresh_token");
-      }
+        const token = await refreshedAccessToken();
+        original.headers.Authorization = `Bearer ${token}`;
+        return api(original);
+      } catch { /* The original rejection reports expiry after credentials are cleared. */ }
     }
     return Promise.reject(friendlyError(error));
-  }
+  },
 );
 
 export default api;
 
 // ─── Auth ────────────────────────────────────────────
+
 export interface RegisterPayload {
   name: string;
   role: string;
@@ -111,31 +121,34 @@ export interface RegisterPayload {
   phone: string;
   otpCode: string;
   email?: string;
+  city?: string;
+  governorate?: string;
+  termsAccepted: boolean;
 }
 
 export const authAPI = {
-  login: (identifier: string, password: string) =>
-    api.post("/auth/login", { identifier, password }),
-  register: (data: RegisterPayload) =>
-    api.post("/auth/register", data),
+  login: (identifier: string, password: string) => {
+    // Detect if identifier looks like a phone number or email
+    const isPhone =
+      /^\+?[\d\s()-]{7,}$/.test(identifier) ||
+      /^20[1-9]\d{8}$/.test(identifier.replace(/\s/g, ""));
+    return api.post("/auth/login", isPhone ? { phone: identifier, password } : { email: identifier, password });
+  },
+  register: (data: RegisterPayload) => api.post("/auth/register", { ...data, type: data.role.toLowerCase() }),
   me: () => api.get("/auth/me"),
   logout: () => api.post("/auth/logout"),
-  refreshToken: (refreshToken: string) =>
-    api.post("/auth/refresh", { refreshToken }),
+  refreshToken: (refreshToken: string) => api.post("/auth/refresh", { refreshToken }),
   sendOtp: (phone: string, email?: string, purpose?: string) =>
     api.post("/auth/send-otp", { phone, email, purpose }),
-  verifyOtp: (phone: string, code: string) =>
-    api.post("/auth/verify-otp", { phone, code }),
-  otpLogin: (phone: string, code: string) =>
-    api.post("/auth/otp-login", { phone, code }),
+  verifyOtp: (phone: string, code: string) => api.post("/auth/verify-otp", { phone, code }),
+  otpLogin: (phone: string, code: string) => api.post("/auth/otp-login", { phone, code }),
 };
 
 // ─── Hotel Buyer ─────────────────────────────────────
+
 export const hotelAPI = {
-  catalog: (params?: Record<string, string>) =>
-    api.get("/hotel/catalog", { params }),
-  orders: (params?: Record<string, string>) =>
-    api.get("/hotel/orders", { params }),
+  catalog: (params?: Record<string, string>) => api.get("/hotel/catalog", { params }),
+  orders: (params?: Record<string, string>) => api.get("/hotel/orders", { params }),
   spend: () => api.get("/hotel/spend"),
   credit: () => api.get("/hotel/credit"),
   cashflow: () => api.get("/hotel/cashflow"),
@@ -147,18 +160,14 @@ export const hotelAPI = {
 };
 
 // ─── Supplier ────────────────────────────────────────
+
 export const supplierAPI = {
-  inventory: (params?: Record<string, string>) =>
-    api.get("/supplier/inventory", { params }),
-  orders: (params?: Record<string, string>) =>
-    api.get("/supplier/orders", { params }),
-  dashboard: (params?: Record<string, string>) =>
-    api.get("/supplier/dashboard", { params }),
+  inventory: (params?: Record<string, string>) => api.get("/supplier/inventory", { params }),
+  orders: (params?: Record<string, string>) => api.get("/supplier/orders", { params }),
+  dashboard: (params?: Record<string, string>) => api.get("/supplier/dashboard", { params }),
   order: (id: string) => api.get(`/orders/${id}`),
-  grns: (params?: Record<string, string>) =>
-    api.get("/grn", { params }),
-  onboard: (data: Record<string, unknown>) =>
-    api.post("/supplier/onboard", data),
+  grns: (params?: Record<string, string>) => api.get("/grn", { params }),
+  onboard: (data: Record<string, unknown>) => api.post("/supplier/onboard", data),
   aiUpload: (products: Array<Record<string, unknown>>) =>
     api.post("/supplier/ai-upload", { products }),
   catalogImport: (file: any) => {
@@ -169,39 +178,36 @@ export const supplierAPI = {
     });
   },
   catalogImportTemplate: () =>
-    api.get("/supplier/catalog/import?template=true", {
-      responseType: "arraybuffer",
-    }),
+    api.get("/supplier/catalog/import?template=true", { responseType: "arraybuffer" }),
 };
 
 // ─── Products ────────────────────────────────────────
+
 export const productAPI = {
-  list: (params?: Record<string, string>) =>
-    api.get("/products", { params }),
+  list: (params?: Record<string, string>) => api.get("/products", { params }),
   get: (id: string) => api.get(`/products/${id}`),
 };
 
 // ─── Orders ──────────────────────────────────────────
+
 export const orderAPI = {
-  create: (data: Record<string, unknown>) =>
-    api.post("/orders", data),
+  create: (data: Record<string, unknown>) => api.post("/orders", data),
   get: (id: string) => api.get(`/orders/${id}`),
-  list: (params?: Record<string, string>) =>
-    api.get("/orders", { params }),
+  list: (params?: Record<string, string>) => api.get("/orders", { params }),
   approve: (id: string) => api.post(`/orders/${id}/approve`),
-  reject: (id: string, reason: string) =>
-    api.post(`/orders/${id}/reject`, { reason }),
+  reject: (id: string, reason: string) => api.post(`/orders/${id}/reject`, { reason }),
   status: (id: string) => api.get(`/orders/${id}/status`),
 };
 
 // ─── Invoices ────────────────────────────────────────
+
 export const invoiceAPI = {
-  list: (params?: Record<string, string>) =>
-    api.get("/invoices", { params }),
+  list: (params?: Record<string, string>) => api.get("/invoices", { params }),
   get: (id: string) => api.get(`/invoices/${id}`),
 };
 
 // ─── Payments ────────────────────────────────────────
+
 export interface PaymentIntentRequest {
   amount: number;
   currency: string;
@@ -226,11 +232,11 @@ export interface PaymentIntentResponse {
 }
 
 export const paymentAPI = {
-  createIntent: (data: PaymentIntentRequest) =>
-    api.post("/payments/create-intent", data),
+  createIntent: (data: PaymentIntentRequest) => api.post("/payments/create-intent", data),
 };
 
 // ─── AI Assistant ────────────────────────────────────
+
 export interface AiMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -244,21 +250,21 @@ export const aiAPI = {
     role: string;
     conversationId?: string;
     hotelId?: string;
-  }) => api.post("/ai/assistant", payload, {
-    responseType: "stream",
-  }),
+  }) => api.post("/ai/assistant", payload, { responseType: "stream" }),
 };
 
 // ─── Oliv Finance (Supplier Factoring) ──────────────
+
 export const olivAPI = {
-   onboardSupplier: (data: Record<string, unknown>) =>
-     api.post("/oliv/onboard-supplier", data),
-   initiateFactoring: (data: Record<string, unknown>) =>
-     api.post("/oliv/initiate-factoring", data),
-   getKycStatus: () => api.get("/oliv/kyc-status"),
- };
+  onboardSupplier: (data: Record<string, unknown>) =>
+    api.post("/oliv/onboard-supplier", data),
+  initiateFactoring: (data: Record<string, unknown>) =>
+    api.post("/oliv/initiate-factoring", data),
+  getKycStatus: () => api.get("/oliv/kyc-status"),
+};
 
 // ─── Onboarding ─────────────────────────────────────
+
 export const onboardingAPI = {
   getProgress: () => api.get("/onboarding/progress"),
   updateStep: (stepKey: string, completed: boolean, data?: Record<string, unknown>) =>
@@ -266,6 +272,7 @@ export const onboardingAPI = {
 };
 
 // ─── Fintech (Credit Facility + Factoring) ────────────
+
 export const fintechAPI = {
   getCreditFacility: () => api.get("/fintech/oliv-facility"),
   getFactoringHistory: () => api.get("/factoring/requests"),
@@ -278,14 +285,16 @@ export const fintechAPI = {
     api.post("/factoring/fund", { invoiceId, partnerId }),
 };
 
-// ─── HOVIN Field Layer (live inbound orders, dock GRN, logistics, 48h cash-out) ──
+// ─── HOVIN Field Layer ───────────────────────────────
 // Field = execution on the ground: dispatcher/supplier receives live POs,
 // scans goods at the dock (GRN + auto credit-note), tracks deliveries/GPS/POD,
 // and requests early 48h payout on approved invoices (reverse factoring).
+
 export const fieldAPI = {
   // Live order inbox feed
   liveOrders: (params?: Record<string, string>) =>
     api.get("/field/orders/live", { params }),
+
   // One-tap status shift on a live PO (READY / IN_TRANSIT / DELIVERED)
   shiftStatus: (orderId: string, status: string) =>
     api.post(`/field/orders/${orderId}/status`, { status }),
@@ -310,6 +319,7 @@ export const fieldAPI = {
 };
 
 // ─── Notifications ─────────────────────────────────
+
 export interface ServerNotification {
   id: string;
   type: string;
