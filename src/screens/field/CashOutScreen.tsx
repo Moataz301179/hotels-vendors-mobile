@@ -7,9 +7,9 @@
  * fast advance — typically funded within 48 hours — by offering a small
  * discount/fee on the invoice value.
  *
- * Falls back to a clearly-labelled demo list when the backend isn't reachable,
- * and formats the reverse-factoring mechanics (requested, fee, advance to you)
- * so the flow is understandable standalone.
+ * Shows only server-confirmed eligible orders. A network/API failure is an
+ * explicit unavailable state; this screen never fabricates orders or queues a
+ * cash-out locally without a durable backend acknowledgement.
  */
 
 import React, { useCallback, useEffect, useState } from "react";
@@ -18,7 +18,7 @@ import {
   ActivityIndicator, Alert,
 } from "react-native";
 import {
-  Wallet, Zap, CheckCircle, FileText, ArrowRight, Info, WifiOff,
+  Wallet, Zap, CheckCircle, FileText, ArrowRight, Info,
 } from "lucide-react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { fieldAPI } from "@/api";
@@ -35,39 +35,29 @@ interface EligibleOrder {
   feeBps: number; // basis points discount charged for the advance
 }
 
-const DEMO_ELIGIBLE: EligibleOrder[] = [
-  {
-    id: "demo-c1", orderNumber: "PO-10234", invoiceNumber: "INV-7712",
-    amount: 18400, currency: "EGP", approvedAt: new Date().toISOString(), feeBps: 125,
-  },
-  {
-    id: "demo-c2", orderNumber: "PO-10231", invoiceNumber: "INV-7709",
-    amount: 9200, currency: "EGP", approvedAt: new Date().toISOString(), feeBps: 150,
-  },
-];
-
 export default function CashOutScreen({ navigation }: any) {
   const [orders, setOrders] = useState<EligibleOrder[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [demoMode, setDemoMode] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ orderNumber: string; advance: number } | null>(null);
 
-  const fetchEligible = useCallback(async (silent = false) => {
+  const fetchEligible = useCallback(async () => {
     try {
       const { data } = await fieldAPI.cashOutEligible();
       if (data.success && data.data) {
-        setOrders(data.data.orders ?? data.data.eligible ?? []);
-        setDemoMode(false);
+        const eligible = data.data.eligibleOrders ?? [];
+        setOrders(eligible.map((order: any) => ({ ...order, amount: Number(order.amount ?? order.total ?? 0), feeBps: Number(order.feeBps ?? 0) })));
+        setLoadError(null);
       } else {
-        setDemoMode(true);
-        if (!silent) setOrders(DEMO_ELIGIBLE);
+        setOrders([]);
+        setLoadError("The server did not confirm cash-out eligibility.");
       }
-    } catch {
-      setDemoMode(true);
-      if (!silent) setOrders(DEMO_ELIGIBLE);
+    } catch (error: any) {
+      setOrders([]);
+      setLoadError(error?.message || "Cash-out eligibility is unavailable.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -84,21 +74,13 @@ export default function CashOutScreen({ navigation }: any) {
       await fieldAPI.cashOutRequest({
         orderId: order.id,
         invoiceNumber: order.invoiceNumber,
-        requestedAmount: order.amount,
-        feeBps: order.feeBps,
-        source: "FIELD_48H",
-        olivReferral: OLIV.referralCode,
+        amount: order.amount,
       });
       setDone({ orderNumber: order.orderNumber, advance });
       setSelectedId(null);
-    } catch {
-      // Backend unreachable → show the requested outcome as a graceful offline note.
-      setDone({ orderNumber: order.orderNumber, advance });
+    } catch (error: any) {
       setSelectedId(null);
-      Alert.alert(
-        "Request queued (offline)",
-        "Your 48h cash-out request was recorded locally and will sync once online."
-      );
+      Alert.alert("Cash-out not submitted", error?.message || "The server did not confirm this request. No local success was recorded.");
     } finally {
       setSubmitting(false);
     }
@@ -122,8 +104,7 @@ export default function CashOutScreen({ navigation }: any) {
           <Text style={styles.doneOrder}>{done.orderNumber}</Text>
           <Text style={styles.doneAdvance}>{fmtMoney(done.advance)}</Text>
           <Text style={styles.doneSub}>
-            Advance based on approved invoice, minus the reverse-factoring fee. Funded
-            within 48 hours under the {OLIV.referralCode} referral programme.
+            The server confirmed this cash-out request. Funding remains subject to partner review.
           </Text>
           <TouchableOpacity
             style={styles.primaryBtn}
@@ -143,12 +124,7 @@ export default function CashOutScreen({ navigation }: any) {
         <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchEligible(); }} tintColor={colors.primary} />
       }
     >
-      {demoMode ? (
-        <View style={styles.demoBanner}>
-          <WifiOff size={14} color={colors.warning} />
-          <Text style={styles.demoBannerText}>Offline demo data — backend unreachable.</Text>
-        </View>
-      ) : null}
+      {loadError ? <Text style={styles.errorText}>{loadError}</Text> : null}
 
       <View style={styles.heroCard}>
         <View style={styles.heroIcon}><Zap size={22} color={colors.primary} /></View>
@@ -240,8 +216,7 @@ const styles = StyleSheet.create({
   container: { padding: spacing.lg, paddingBottom: 100, gap: spacing.md, backgroundColor: colors.bg, flexGrow: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg, gap: spacing.md },
   centerText: { ...typography.body, color: colors.textMuted },
-  demoBanner: { flexDirection: "row", alignItems: "center", gap: spacing.sm, backgroundColor: colors.warning + "18", padding: spacing.sm, borderRadius: radii.md },
-  demoBannerText: { ...typography.caption, color: colors.warning, flex: 1 },
+  errorText: { ...typography.bodySmall, color: colors.warning, backgroundColor: colors.warning + "18", padding: spacing.sm, borderRadius: radii.md },
   heroCard: { flexDirection: "row", alignItems: "center", gap: spacing.md, backgroundColor: colors.bgCard, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.lg },
   heroIcon: { width: 44, height: 44, borderRadius: radii.md, backgroundColor: colors.primary + "1e", alignItems: "center", justifyContent: "center" },
   heroTextWrap: { flex: 1 },

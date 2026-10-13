@@ -26,7 +26,7 @@ import { fieldAPI } from "@/api";
 
 interface ScanResult {
   grnNumber: string;
-  creditNoteNumber: string;
+  creditNoteNumber?: string | null;
   lineItemsAccepted: number;
   lineItemsDiscrepant: number;
 }
@@ -36,6 +36,7 @@ export default function DockScannerScreen({ navigation }: any) {
   const [scanning, setScanning] = useState(true);
   const [barcode, setBarcode] = useState("");
   const [manualCode, setManualCode] = useState("");
+  const [orderId, setOrderId] = useState("");
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
 
@@ -44,46 +45,30 @@ export default function DockScannerScreen({ navigation }: any) {
     if (!data || !scanning || processing || result) return;
     setScanning(false);
     setBarcode(data);
-    await submitScan(data);
+    await submitScan(data, orderId.trim());
   };
 
-  const submitScan = async (code: string) => {
+  const submitScan = async (code: string, targetOrderId: string) => {
+    if (!code.trim() || !targetOrderId.trim()) {
+      Alert.alert("Order required", "Enter the order ID before creating a GRN. A barcode alone cannot be treated as a received order.");
+      setScanning(true);
+      return;
+    }
     setProcessing(true);
     try {
       // Create the GRN from the scanned barcode…
-      const { data: grnRes } = await fieldAPI.scanForGrn({ barcode: code, source: "DOCK" });
+      const { data: grnRes } = await fieldAPI.scanForGrn({ barcode: code, orderId: targetOrderId });
       const grn = grnRes.data?.grn ?? grnRes.data;
 
-      // …and auto-generate a credit note for any accepted-with-discrepancy lines.
-      let creditNoteNumber = "N/A";
-      try {
-        const { data: cnRes } = await fieldAPI.createCreditNote({
-          grnId: grn?.id,
-          reason: "Dock scan acceptance",
-        });
-        creditNoteNumber = cnRes.data?.creditNoteNumber ?? "Auto-generated";
-      } catch {
-        creditNoteNumber = "Auto-generated";
-      }
-
       setResult({
-        grnNumber: grn?.grnNumber ?? `GRN-${code.slice(-6).toUpperCase()}`,
-        creditNoteNumber,
+        grnNumber: grn?.grnNumber ?? "",
+        creditNoteNumber: null,
         lineItemsAccepted: grn?.lineItemsAccepted ?? 0,
         lineItemsDiscrepant: grn?.lineItemsDiscrepant ?? 0,
       });
-    } catch {
-      // Backend not reachable — surface a graceful "scan recorded" outcome.
-      setResult({
-        grnNumber: `GRN-${code.slice(-6).toUpperCase()}`,
-        creditNoteNumber: "Auto-generated",
-        lineItemsAccepted: 0,
-        lineItemsDiscrepant: 0,
-      });
-      Alert.alert(
-        "Scan recorded (offline)",
-        "GRN created locally from the barcode. It will sync to the backend once the dock is back online."
-      );
+    } catch (error: any) {
+      setScanning(true);
+      Alert.alert("GRN not created", error?.message || "The server did not confirm this receipt. No local success was recorded.");
     } finally {
       setProcessing(false);
     }
@@ -93,6 +78,7 @@ export default function DockScannerScreen({ navigation }: any) {
     setResult(null);
     setBarcode("");
     setManualCode("");
+    setOrderId("");
     setScanning(true);
   };
 
@@ -116,11 +102,9 @@ export default function DockScannerScreen({ navigation }: any) {
             <FileText size={18} color={colors.primary} />
             <Text style={styles.cnTitle}>Automated Credit Note</Text>
           </View>
-          <Text style={styles.cnNumber}>{result.creditNoteNumber}</Text>
+          {result.creditNoteNumber ? <Text style={styles.cnNumber}>{result.creditNoteNumber}</Text> : null}
           <Text style={styles.cnDesc}>
-            Generated on {result.lineItemsDiscrepant > 0
-              ? `${result.lineItemsDiscrepant} discrepant line(s)`
-              : "accepted quantities"} against the supplier invoice.
+            Credit notes are created only after a verified discrepancy and invoice amount are recorded.
           </Text>
         </View>
 
@@ -150,7 +134,9 @@ export default function DockScannerScreen({ navigation }: any) {
         {manualEntry(
           manualCode,
           setManualCode,
-          () => submitScan(manualCode),
+          orderId,
+          setOrderId,
+          () => submitScan(manualCode, orderId.trim()),
           colors
         )}
       </ScrollView>
@@ -171,6 +157,15 @@ export default function DockScannerScreen({ navigation }: any) {
       <View style={styles.scanOverlay}>
         <View style={styles.scanFrame} />
         <Text style={styles.scanHint}>Align the barcode inside the frame</Text>
+        <TextInput
+          style={styles.scanOrderInput}
+          placeholder="Order ID (required)"
+          placeholderTextColor="rgba(255,255,255,0.7)"
+          value={orderId}
+          onChangeText={setOrderId}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
         {processing && <ActivityIndicator size="large" color="#fff" style={styles.scanSpinner} />}
         {!scanning && !processing && !result && (
           <Text style={styles.scanHint}>Barcode read — processing GRN…</Text>
@@ -184,6 +179,8 @@ export default function DockScannerScreen({ navigation }: any) {
 function manualEntry(
   manualCode: string,
   setManualCode: (v: string) => void,
+  orderId: string,
+  setOrderId: (v: string) => void,
   onSubmit: () => void,
   colors: typeof import("@/theme").colors
 ) {
@@ -202,10 +199,19 @@ function manualEntry(
         autoCapitalize="characters"
         autoCorrect={false}
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Order ID (required)"
+        placeholderTextColor={colors.textMuted}
+        value={orderId}
+        onChangeText={setOrderId}
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
       <TouchableOpacity
-        style={[styles.primaryBtn, !manualCode && { opacity: 0.5 }]}
+        style={[styles.primaryBtn, (!manualCode || !orderId) && { opacity: 0.5 }]}
         onPress={onSubmit}
-        disabled={!manualCode}
+        disabled={!manualCode || !orderId}
       >
         <PackageCheck size={18} color="#fff" />
         <Text style={styles.primaryBtnText}>Create GRN</Text>
@@ -224,6 +230,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.03)",
   },
   scanHint: { color: "#fff", ...typography.body, fontWeight: "600", textShadowColor: "rgba(0,0,0,0.6)", textShadowRadius: 4 },
+  scanOrderInput: { width: 240, backgroundColor: "rgba(0,0,0,0.65)", borderColor: "rgba(255,255,255,0.7)", borderWidth: 1, borderRadius: radii.md, padding: spacing.md, color: "#fff", ...typography.body },
   scanSpinner: { marginTop: spacing.sm },
 
   permissionCard: {
