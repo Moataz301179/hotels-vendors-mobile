@@ -59,11 +59,9 @@ module.exports = ({ config }) => ({
     web: {
       favicon: "./assets/favicon.png",
     },
-    extra: {
-      eas: {
-        projectId: "515fa26b-e2f5-4036-9d25-800081b76af9",
-      },
-    },
+    // EAS project identity is created for the `hovin` slug below. Do not
+    // carry forward the legacy `invo` project id.
+    extra: { eas: { projectId: "ec9544d2-fb7d-4806-95b3-dae26d8893e9" } },
     plugins: ["expo-font", "expo-secure-store", "expo-web-browser", "@clerk/expo"],
   },
 });
