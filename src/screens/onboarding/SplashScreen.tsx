@@ -13,6 +13,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { colors, typography, spacing, radii } from "@/theme";
+import HovinWordmark from "@/components/HovinWordmark";
 
 const INIT_STEPS = [
   "Initializing secure session",
@@ -54,7 +55,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
 
       <View style={styles.logoWrap}>
         {/* No logo stamp — clean text-only brand on the loading frame */}
-        <Text style={styles.brandName}>HOVIN</Text>
+        <HovinWordmark size={34} />
         <Text style={styles.logoTagline}>Digital Procurement Hub</Text>
       </View>
       <Text style={styles.byline}>A Hotels Vendors application</Text>

@@ -23,7 +23,7 @@ Notifications.setNotificationHandler({
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!Device.isDevice) {
-    console.warn("Notifications only work on physical devices");
+    // Simulator sessions do not support push registration; silently skip it.
     return false;
   }
 

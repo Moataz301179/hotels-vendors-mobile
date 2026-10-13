@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl,
+  View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl, ScrollView,
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { orderAPI } from "@/api";
@@ -23,6 +23,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
 export default function OrdersScreen({ navigation }: any) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState<"ALL" | OrderStatus>("ALL");
 
   const fetchOrders = async () => {
     try {
@@ -32,6 +33,10 @@ export default function OrdersScreen({ navigation }: any) {
   };
 
   useEffect(() => { fetchOrders(); }, []);
+
+  const visibleOrders = orders
+    .filter((order) => filter === "ALL" || order.status === filter)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const renderItem = ({ item }: { item: Order }) => (
     <TouchableOpacity
@@ -55,11 +60,26 @@ export default function OrdersScreen({ navigation }: any) {
 
   return (
     <FlatList
-      data={orders}
+      data={visibleOrders}
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
       contentContainerStyle={styles.list}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchOrders(); }} tintColor={colors.primary} />}
+      ListHeaderComponent={
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+          {["ALL", "PENDING", "APPROVED", "IN_TRANSIT", "DELIVERED", "REJECTED"].map((value) => (
+            <TouchableOpacity
+              key={value}
+              onPress={() => setFilter(value as "ALL" | OrderStatus)}
+              style={[styles.filter, filter === value && styles.filterActive]}
+            >
+              <Text style={[styles.filterText, filter === value && styles.filterTextActive]}>
+                {value === "ALL" ? "All" : value.replace("_", " ")}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      }
       ListEmptyComponent={<Text style={styles.empty}>No orders yet</Text>}
     />
   );
@@ -77,4 +97,9 @@ const styles = StyleSheet.create({
   amount: { ...typography.body, color: colors.primary, fontWeight: "600" },
   date: { ...typography.caption, color: colors.textMuted },
   empty: { ...typography.body, color: colors.textMuted, textAlign: "center", marginTop: spacing.xxxl * 3 },
+  filters: { gap: spacing.sm, paddingBottom: spacing.md },
+  filter: { borderWidth: 1, borderColor: colors.border, borderRadius: radii.full, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  filterActive: { backgroundColor: colors.primary + "22", borderColor: colors.primary },
+  filterText: { ...typography.caption, color: colors.textMuted, fontWeight: "600" },
+  filterTextActive: { color: colors.primary },
 });

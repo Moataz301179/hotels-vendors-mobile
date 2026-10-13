@@ -4,7 +4,8 @@
  */
 
 import React from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { useAuth } from "@clerk/expo";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -20,7 +21,6 @@ import {
 import LoginScreen from "@/screens/auth/LoginScreen";
 import RegisterScreen from "@/screens/auth/RegisterScreen";
 import OtpScreen from "@/screens/auth/OtpScreen";
-import OtpLoginScreen from "@/screens/auth/OtpLoginScreen";
 import ForgotPasswordScreen from "@/screens/auth/ForgotPasswordScreen";
 
 // Hotel screens
@@ -310,12 +310,27 @@ function ShippingTabs() {
 }
 
 export default function AppNavigator() {
-  const { isAuthenticated, role, isLoading } = useAuthStore();
+  const { isAuthenticated, role, isLoading, authError, syncClerkSession } = useAuthStore();
+  const { isLoaded: clerkLoaded, isSignedIn } = useAuth();
 
   if (isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  // Do not present a second sign-in/sign-up surface while Clerk already has
+  // an active session. Wait for the server-side tenant profile to load.
+  if (clerkLoaded && isSignedIn && !isAuthenticated) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg, justifyContent: "center", alignItems: "center", padding: 28 }}>
+        <Text style={{ color: colors.text, fontSize: 20, fontWeight: "700", textAlign: "center" }}>Finishing your workspace setup</Text>
+        <Text style={{ color: colors.textMuted, marginTop: 12, textAlign: "center" }}>{authError || "Your Clerk session is active. We are loading the organization profile before opening HOVIN."}</Text>
+        <TouchableOpacity onPress={() => void syncClerkSession(clerkLoaded, Boolean(isSignedIn))} style={{ marginTop: 22, paddingHorizontal: 22, paddingVertical: 13, borderRadius: 10, backgroundColor: colors.primary }}>
+          <Text style={{ color: colors.bg, fontWeight: "700" }}>Retry workspace setup</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -328,7 +343,6 @@ export default function AppNavigator() {
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Otp" component={OtpScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="OtpLogin" component={OtpLoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: "Reset Password" }} />
           </>
          ) : role === "SUPPLIER" ? (

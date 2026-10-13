@@ -1,10 +1,8 @@
 /**
- * OTP Screen — verify mobile number
+ * OTP Screen — verify the email address required by the active Clerk instance
  *
- * mode "register": calls register() with the account profile + verified code.
- * mode "login": calls otpLogin() with the code.
- * On success the auth store flips isAuthenticated and navigation swaps to the
- * main tabs automatically.
+ * Verification stays on Clerk's current sign-up resource. No legacy OTP or
+ * custom JWT endpoint is used here.
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -19,33 +17,29 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
-import { normalizePhone } from "@/utils/phone";
-import { openOlivOnboarding } from "@/utils/olivLink";
+import { useSignUp } from "@clerk/expo";
+import HovinWordmark from "@/components/HovinWordmark";
 
 const RESEND_SECONDS = 60;
 
 interface OtpParams {
-  phone: string;
-  mode: "login" | "register";
-  name?: string;
-  email?: string;
-  password?: string;
+  email: string;
+  mode: "register";
   role?: string;
-  creditInterest?: boolean;
 }
 
 export default function OtpScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const params: OtpParams = route.params;
-  const phone = normalizePhone(params.phone);
 
-  const { register, otpLogin, sendOtp, isLoading } = useAuthStore();
+  const { isLoading: storeLoading, loadUser } = useAuthStore();
+  const { signUp, fetchStatus: signUpFetchStatus } = useSignUp();
+  const isLoading = storeLoading || signUpFetchStatus === "fetching";
   const [code, setCode] = useState("");
   const [seconds, setSeconds] = useState(RESEND_SECONDS);
   const [sending, setSending] = useState(false);
@@ -54,9 +48,10 @@ export default function OtpScreen() {
   const resend = async () => {
     setSending(true);
     try {
-      await sendOtp(phone, params.email, params.mode === "register" ? "REGISTER" : "LOGIN");
+      const sent = await signUp.verifications.sendEmailCode();
+      if (sent.error) throw new Error(sent.error.message || "Could not send verification code");
       setSeconds(RESEND_SECONDS);
-      Alert.alert("Code sent", params.email ? `We sent a 6-digit code to ${params.email}` : `We sent a 6-digit code to ${phone}`);
+      Alert.alert("Code sent", `We sent a 6-digit code to ${params.email}`);
     } catch (err: any) {
       Alert.alert("Error", err.message || "Could not send code");
     } finally {
@@ -91,31 +86,14 @@ export default function OtpScreen() {
       return;
     }
     try {
-      if (params.mode === "register") {
-        await register({
-          name: params.name || "",
-          role: params.role || "HOTEL",
-          password: params.password || "",
-          phone,
-          otpCode: code.trim(),
-          email: params.email || undefined,
-        });
-        // Oliv credit onboarding — COMPULSORY step (no choice): opens the CHV000
-        // pre-filled Oliv onboarding so every new user's financing is onboarded
-        // and the referral + commission is attributed to HotelsVendors. It is
-        // the only offering until the real catalog goes live.
-        try {
-          await openOlivOnboarding({
-            name: params.name || "",
-            phone,
-            email: params.email || undefined,
-          });
-        } catch (e) {
-          // referral open failed — account still created, credit captured on next step
-        }
-      } else {
-        await otpLogin(phone, code.trim());
-      }
+      const result = await signUp.verifications.verifyEmailCode({ code: code.trim() });
+      if (result.error) throw new Error(result.error.message || "Invalid verification code");
+      const finalized = await signUp.finalize();
+      if (finalized.error) throw new Error(finalized.error.message || "Could not finish account setup");
+      // Clerk session activation and token minting are asynchronous. Refresh
+      // the tenant profile only after finalize so navigation cannot fall back
+      // to the unauthenticated stack during that propagation window.
+      await loadUser();
     } catch (err: any) {
       Alert.alert("Verification Failed", err.message || "Invalid code");
     }
@@ -130,11 +108,11 @@ export default function OtpScreen() {
     >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.logoWord}>HOVIN</Text>
-          <Text style={styles.title}>Verify your number</Text>
+          <HovinWordmark size={28} />
+          <Text style={styles.title}>Verify your email</Text>
           <Text style={styles.subtext}>
             Enter the 6-digit code we sent to{`\n`}
-            <Text style={styles.phone}>{params.email || phone}</Text>
+            <Text style={styles.phone}>{params.email}</Text>
           </Text>
         </View>
 

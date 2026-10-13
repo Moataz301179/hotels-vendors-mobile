@@ -136,13 +136,16 @@ function Dot({ index, scrollX }: { index: number; scrollX: SharedValue<number> }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  slide: { width: SCREEN_W, flex: 1 },
+  // Parallax images are intentionally scaled beyond the slide bounds. Clip each
+  // page so the neighboring page cannot bleed into the active page on Android.
+  slide: { width: SCREEN_W, flex: 1, overflow: "hidden" },
   image: { width: SCREEN_W, height: "100%", position: "absolute" },
   overlay: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: "rgba(10,14,26,0.55)",
   },
-  textBlock: { flex: 1, justifyContent: "flex-end", padding: spacing.xl, paddingBottom: spacing.xxxl },
+  // Keep the copy above the absolute footer on compact Android viewports.
+  textBlock: { flex: 1, justifyContent: "flex-end", padding: spacing.xl, paddingBottom: 156 },
   kicker: { ...typography.label, color: "#FFFFFF", letterSpacing: 2, textTransform: "uppercase", marginBottom: spacing.sm },
   title: { ...typography.h1, color: "#FFFFFF", fontSize: 30, lineHeight: 38, marginBottom: spacing.md },
   tip: { ...typography.body, color: "rgba(255,255,255,0.78)", lineHeight: 24 },

@@ -213,7 +213,7 @@ export const aiAPI = {
     role: string;
     conversationId?: string;
     hotelId?: string;
-  }) => { void payload; return v2Unavailable("AI assistant"); },
+  }) => api.post("/assistant", payload),
 };
 
 // ─── Oliv Finance (Supplier Factoring) ──────────────

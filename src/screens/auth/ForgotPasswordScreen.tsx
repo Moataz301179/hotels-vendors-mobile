@@ -17,14 +17,18 @@ import {
   ScrollView,
 } from "react-native";
 import { colors, spacing, radii, typography } from "@/theme";
-import api from "@/api";
+import { useSignIn } from "@clerk/expo";
 
 export default function ForgotPasswordScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [stage, setStage] = useState<"email" | "code" | "password" | "done">("email");
+  const { signIn, fetchStatus } = useSignIn();
 
-  const handleReset = async () => {
+  const handleSendCode = async () => {
     if (!email) {
       Alert.alert("Error", "Please enter your email address");
       return;
@@ -32,28 +36,68 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      const { data } = await api.post("/auth/forgot-password", { email: email.trim() });
-      if (data.success) {
-        setSent(true);
-      } else {
-        Alert.alert("Error", data.error || "Failed to send reset email");
-      }
+      const started = await signIn.create({ identifier: email.trim().toLowerCase() });
+      if (started.error) throw new Error(started.error.message || "Could not start password recovery");
+      const sent = await signIn.resetPasswordEmailCode.sendCode();
+      if (sent.error) throw new Error(sent.error.message || "Could not send the reset code");
+      setStage("code");
     } catch (err: any) {
-      Alert.alert("Error", err.response?.data?.error || "Network error. Please try again.");
+      Alert.alert("Could not send reset code", err.message || "Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (sent) {
+  const handleVerifyCode = async () => {
+    if (code.trim().length !== 6) {
+      Alert.alert("Invalid code", "Enter the 6-digit code from your email.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const verified = await signIn.resetPasswordEmailCode.verifyCode({ code: code.trim() });
+      if (verified.error) throw new Error(verified.error.message || "The code could not be verified");
+      setStage("password");
+    } catch (err: any) {
+      Alert.alert("Could not verify code", err.message || "Check the code and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetPassword = async () => {
+    if (password.length < 15) {
+      Alert.alert("Password too short", "Use at least 15 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Passwords do not match", "Enter the same new password in both fields.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const submitted = await signIn.resetPasswordEmailCode.submitPassword({ password });
+      if (submitted.error) throw new Error(submitted.error.message || "Could not update the password");
+      if (signIn.status === "complete") {
+        const finalized = await signIn.finalize();
+        if (finalized.error) throw new Error(finalized.error.message || "Password changed, but sign-in could not finish");
+      }
+      setStage("done");
+    } catch (err: any) {
+      Alert.alert("Could not change password", err.message || "Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (stage === "done") {
     return (
       <View style={styles.container}>
         <View style={styles.center}>
           <Text style={styles.checkmark}>✓</Text>
-          <Text style={styles.title}>Check Your Email</Text>
+          <Text style={styles.title}>Password updated</Text>
           <Text style={styles.subtitle}>
-            We've sent a password reset link to{"\n"}
-            <Text style={{ color: colors.text }}>{email}</Text>
+            Your password has been changed. Return to sign in with your new password.
           </Text>
           <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
             <Text style={styles.buttonText}>Back to Sign In</Text>
@@ -67,31 +111,35 @@ export default function ForgotPasswordScreen({ navigation }: any) {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.title}>Reset Password</Text>
+          <Text style={styles.title}>{stage === "email" ? "Reset password" : stage === "code" ? "Verify your email" : "Choose a new password"}</Text>
           <Text style={styles.subtitle}>
-            Enter your email address and we'll send you a link to reset your password.
+            {stage === "email" && "Enter the email on your account. Clerk will send a verification code."}
+            {stage === "code" && `Enter the 6-digit code sent to ${email}.`}
+            {stage === "password" && "Choose a password that is at least 15 characters long."}
           </Text>
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>Email Address</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="you@hotel.com"
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            autoComplete="email"
-          />
+          {stage === "email" && <>
+            <Text style={styles.label}>Email address</Text>
+            <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="you@hotel.com" placeholderTextColor={colors.textMuted} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" autoComplete="email" />
+          </>}
+          {stage === "code" && <>
+            <Text style={styles.label}>Verification code</Text>
+            <TextInput style={styles.input} value={code} onChangeText={setCode} placeholder="6-digit code" placeholderTextColor={colors.textMuted} keyboardType="number-pad" autoComplete="one-time-code" maxLength={6} />
+            <TouchableOpacity onPress={handleSendCode} disabled={loading}>
+              <Text style={styles.link}>Send another code</Text>
+            </TouchableOpacity>
+          </>}
+          {stage === "password" && <>
+            <Text style={styles.label}>New password</Text>
+            <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholder="At least 15 characters" placeholderTextColor={colors.textMuted} secureTextEntry autoCapitalize="none" autoCorrect={false} />
+            <Text style={styles.label}>Confirm new password</Text>
+            <TextInput style={styles.input} value={confirmPassword} onChangeText={setConfirmPassword} placeholder="Re-enter new password" placeholderTextColor={colors.textMuted} secureTextEntry autoCapitalize="none" autoCorrect={false} />
+          </>}
 
-          <TouchableOpacity style={styles.button} onPress={handleReset} disabled={loading}>
-            {loading ? (
-              <ActivityIndicator color={colors.bg} />
-            ) : (
-              <Text style={styles.buttonText}>Send Reset Link</Text>
-            )}
+          <TouchableOpacity style={styles.button} onPress={stage === "email" ? handleSendCode : stage === "code" ? handleVerifyCode : handleSetPassword} disabled={loading || fetchStatus === "fetching"}>
+            {loading || fetchStatus === "fetching" ? <ActivityIndicator color={colors.bg} /> : <Text style={styles.buttonText}>{stage === "email" ? "Send reset code" : stage === "code" ? "Verify code" : "Update password"}</Text>}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.goBack()}>

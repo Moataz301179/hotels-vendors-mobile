@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "HOVIN",
-    "slug": "hovin",
+    "name": "HotelsVendors",
+    "slug": "hotelsvendors",
     "version": "1.0.0",
     "backgroundColor": "#0B0F14",
     "icon": "./assets/icon.png",
@@ -15,6 +15,7 @@
       "backgroundColor": "#0B0F14",
       "package": "com.hotelsvendors.hovin",
       "versionCode": 1,
+      "permissions": ["CAMERA", "READ_MEDIA_IMAGES"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#0B0F14"
@@ -24,7 +25,11 @@
       "backgroundColor": "#0B0F14",
       "userInterfaceStyle": "dark",
       "bundleIdentifier": "com.hotelsvendors.hovin",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "HOVIN uses the camera to capture delivery and invoice evidence.",
+        "NSPhotoLibraryUsageDescription": "HOVIN uses your photo library to attach delivery and invoice evidence."
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

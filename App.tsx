@@ -3,10 +3,11 @@
  */
 
 import React, { useEffect, useState, useCallback } from "react";
-import { View } from "react-native";
+import { LogBox, View } from "react-native";
 import { ClerkProvider } from "@clerk/expo";
 import { useAuth } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
+import * as NativeSplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -34,13 +35,19 @@ type Phase = "splash" | "onboarding" | "app";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
+// Expo Notifications probes the push keychain even on iOS Simulator, where
+// the entitlement is intentionally unavailable. It is safe to ignore this
+// simulator-only diagnostic; push registration is already skipped by the
+// notification service when `Device.isDevice` is false.
+LogBox.ignoreLogs(["[expo-notifications] Error reading persisted server registration info"]);
+void NativeSplashScreen.hideAsync();
+
 if (!publishableKey) {
   throw new Error("EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is required");
 }
 
 function AppContent() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
-  const { restoreSession } = useAuthStore();
   const { loadFromStorage } = useNotificationStore();
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
   const { isDark } = useTheme();
@@ -53,14 +60,18 @@ function AppContent() {
 
   useEffect(() => {
     setClerkTokenGetter(() => getToken());
-    void useAuthStore.getState().syncClerkSession(isLoaded, Boolean(isSignedIn));
-    loadFromStorage();
-    hydrateSettings();
-    if (phase === "app") {
-      initializeNotifications();
-    }
     return () => setClerkTokenGetter(null);
-  }, [getToken, hydrateSettings, isLoaded, isSignedIn, loadFromStorage, phase, restoreSession]);
+  }, [getToken]);
+
+  useEffect(() => {
+    void useAuthStore.getState().syncClerkSession(isLoaded, Boolean(isSignedIn));
+    void loadFromStorage();
+    void hydrateSettings();
+  }, [hydrateSettings, isLoaded, isSignedIn, loadFromStorage]);
+
+  useEffect(() => {
+    if (phase === "app") void initializeNotifications();
+  }, [phase]);
 
   const handleSplashDone = useCallback(async () => {
     const seen = await hasOnboarded();
