@@ -53,12 +53,14 @@ export default function PODScreen({ route, navigation }: any) {
 
     setSubmitting(true);
     try {
-      await api.post("/shipping/pod", {
-        tripStopId: stopId,
-        photoUrl: photo,
-        signatureName: signature,
-        notes,
-        status: "DELIVERED",
+      const formData = new FormData();
+      formData.append("stopId", stopId);
+      formData.append("receivedBy", signature.trim());
+      formData.append("notes", notes.trim());
+      formData.append("status", "POD_CAPTURED");
+      formData.append("photo", { uri: photo, name: "delivery.jpg", type: "image/jpeg" } as unknown as Blob);
+      await api.post("/shipping/pod", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       setDelivered(true);
       setTimeout(() => navigation.goBack(), 2000);
@@ -149,7 +151,7 @@ export default function PODScreen({ route, navigation }: any) {
               {
                 text: "No One Present",
                 onPress: async () => {
-                  await api.post("/shipping/pod", { tripStopId: stopId, status: "FAILED", notes: "No one present at delivery location" });
+                  await api.post("/shipping/pod", { stopId, status: "FAILED", notes: "No one present at delivery location" });
                   navigation.goBack();
                 },
               },
