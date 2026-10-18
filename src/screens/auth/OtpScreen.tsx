@@ -25,8 +25,6 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { colors, spacing, radii, typography } from "@/theme";
 import { useAuthStore } from "@/store/auth";
 import { normalizePhone } from "@/utils/phone";
-import { openOlivOnboarding } from "@/utils/olivLink";
-import { SupplierOnboardingBot } from "@/components/ai-assistant/supplier-onboarding-chatbot";
 
 const RESEND_SECONDS = 60;
 
@@ -37,7 +35,7 @@ interface OtpParams {
   email?: string;
   password?: string;
   role?: string;
-  creditInterest?: boolean;
+  termsAccepted?: boolean;
 }
 
 export default function OtpScreen() {
@@ -100,20 +98,10 @@ export default function OtpScreen() {
           phone,
           otpCode: code.trim(),
           email: params.email || undefined,
+          // Do not infer legal consent. The registration screen must pass an
+          // explicit acceptance before the server can activate an account.
+          termsAccepted: params.termsAccepted === true,
         });
-        // Oliv credit onboarding — COMPULSORY step (no choice): opens the CHV000
-        // pre-filled Oliv onboarding so every new user's financing is onboarded
-        // and the referral + commission is attributed to HotelsVendors. It is
-        // the only offering until the real catalog goes live.
-        try {
-          await openOlivOnboarding({
-            name: params.name || "",
-            phone,
-            email: params.email || undefined,
-          });
-        } catch (e) {
-          // referral open failed — account still created, credit captured on next step
-        }
       } else {
         await otpLogin(phone, code.trim());
       }

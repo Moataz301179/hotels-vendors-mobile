@@ -14,7 +14,7 @@ module.exports = ({ config }) => ({
       bundleIdentifier: "com.hotelsvendors.hovin",
       associatedDomains: ["applinks:hotelsvendors.com"],
       infoPlist: {
-        NSCameraUsageDescription: "HOVIN needs camera access to photograph invoices for financing.",
+        NSCameraUsageDescription: "HOVIN needs camera access to scan product barcodes for controlled receiving and physical counts.",
         NSPhotoLibraryUsageDescription: "HOVIN needs photo library access to select invoice images.",
         NSUserNotificationUsageDescription: "HOVIN needs permission to send you order and payment updates.",
         NSAppleEventsUsageDescription: "HOVIN needs permission to handle payment callback links.",
@@ -64,6 +64,12 @@ module.exports = ({ config }) => ({
         projectId: "515fa26b-e2f5-4036-9d25-800081b76af9",
       },
     },
-    plugins: ["expo-font"],
+    plugins: [
+      "expo-font",
+      ["expo-camera", {
+        cameraPermission: "HOVIN uses the camera to scan product barcodes for controlled receiving and physical counts.",
+        recordAudioAndroid: false,
+      }],
+    ],
   },
 });

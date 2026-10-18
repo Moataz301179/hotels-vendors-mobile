@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
-    borderLeft: 3,
+    borderLeftWidth: 3,
     borderLeftColor: "#314B43",
   },
   questionText: {

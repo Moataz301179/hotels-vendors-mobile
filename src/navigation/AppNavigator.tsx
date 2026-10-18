@@ -39,6 +39,7 @@ import HotelCashflowScreen from "@/screens/hotel/HotelCashflowScreen";
 import HotelFinancingScreen from "@/screens/hotel/HotelFinancingScreen";
 import ScheduledOrdersScreen from "@/screens/hotel/ScheduledOrdersScreen";
 import InventoryBalanceScreen from "@/screens/hotel/InventoryBalanceScreen";
+import PhysicalCountScreen from "@/screens/hotel/PhysicalCountScreen";
 
 // Supplier screens
 import SupplierDashboardScreen from "@/screens/supplier/SupplierDashboardScreen";
@@ -312,11 +313,10 @@ function ShippingTabs() {
 export default function AppNavigator() {
   const { isAuthenticated, role, isLoading } = useAuthStore();
 
-  // TEMPORARY PREVIEW BYPASS (dev only) — lets you see the app inside without logging in.
-  // Set PREVIEW_MODE to false to restore real auth. Set PREVIEW_ROLE to "HOTEL"/"SUPPLIER"/"SHIPPING"
-  // to preview each role's dashboards.
-  const PREVIEW_MODE = true;
-  const PREVIEW_ROLE = "HOTEL";
+  // Preview is opt-in and unavailable in a release build. A mobile release
+  // must never silently present a buyer, supplier, or carrier role.
+  const PREVIEW_MODE = __DEV__ && process.env.EXPO_PUBLIC_PREVIEW_MODE === "true";
+  const PREVIEW_ROLE = process.env.EXPO_PUBLIC_PREVIEW_ROLE || "HOTEL";
   const authed = PREVIEW_MODE ? true : isAuthenticated;
   const effRole: string | null = PREVIEW_MODE ? PREVIEW_ROLE : role;
 
@@ -367,6 +367,7 @@ export default function AppNavigator() {
              <Stack.Screen name="HotelFinancing" component={HotelFinancingScreen} options={{ title: "Financing" }} />
              <Stack.Screen name="ScheduledOrders" component={ScheduledOrdersScreen} options={{ title: "Scheduled Orders" }} />
              <Stack.Screen name="InventoryBalance" component={InventoryBalanceScreen} options={{ title: "Inventory Balance" }} />
+             <Stack.Screen name="PhysicalCount" component={PhysicalCountScreen} options={{ title: "Physical Count" }} />
                            <Stack.Screen name="CategoryGridDemo" component={CategoryGridDemoScreen} options={{ title: "Categories" }} />
                          </>
         )}

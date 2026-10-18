@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import {
   View, Text, ScrollView, StyleSheet, RefreshControl, TouchableOpacity,
 } from "react-native";
-import { ClipboardList, Package, TrendingDown, TrendingUp, AlertTriangle, ChevronRight } from "lucide-react-native";
+import { ClipboardList, Package, TrendingDown, TrendingUp, AlertTriangle, ScanLine } from "lucide-react-native";
 import { colors, spacing, radii, typography } from "@/theme";
 import api from "@/api";
 
@@ -65,6 +65,14 @@ export default function InventoryBalanceScreen({ navigation }: any) {
         <ClipboardList size={20} color={colors.primary} />
         <Text style={styles.headerTitle}>Inventory Balance</Text>
       </View>
+
+      <TouchableOpacity style={styles.countAction} onPress={() => navigation.navigate("PhysicalCount")}>
+        <ScanLine size={18} color="#fff" />
+        <View style={styles.countActionCopy}>
+          <Text style={styles.countActionTitle}>Start controlled physical count</Text>
+          <Text style={styles.countActionText}>Scan identifies the item; you confirm every quantity.</Text>
+        </View>
+      </TouchableOpacity>
 
       {/* Period Selector */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.periodScroll}>
@@ -175,6 +183,10 @@ const styles = StyleSheet.create({
   container: { padding: spacing.lg, paddingBottom: 100 },
   header: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.lg },
   headerTitle: { ...typography.h2, color: colors.text },
+  countAction: { flexDirection: "row", alignItems: "center", gap: spacing.md, backgroundColor: colors.primary, borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.lg },
+  countActionCopy: { flex: 1 },
+  countActionTitle: { ...typography.body, color: "#fff", fontWeight: "700" },
+  countActionText: { ...typography.caption, color: "#fff", opacity: 0.86, marginTop: 2 },
   periodScroll: { marginBottom: spacing.lg },
   periodChip: { flexDirection: "row", alignItems: "center", gap: spacing.xs, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radii.sm, backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border, marginRight: spacing.sm },
   periodChipActive: { backgroundColor: colors.primary + "20", borderColor: colors.primary },

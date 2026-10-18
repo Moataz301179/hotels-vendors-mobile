@@ -14,6 +14,24 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// V2 endpoints are protected by Clerk. The legacy access token deliberately
+// cannot be forwarded to this client: that would make an old session look like
+// a valid procurement authorization.
+const v2Api = axios.create({
+  baseURL: `${API_BASE}/api/v2`,
+  timeout: 30000,
+  headers: { "Content-Type": "application/json" },
+});
+
+v2Api.interceptors.request.use(async (config) => {
+  const clerkToken = await SecureStore.getItemAsync("clerk_v2_session_token");
+  if (!clerkToken) {
+    return Promise.reject(new Error("Sign in with your HotelsVendors work account before recording a count."));
+  }
+  config.headers.Authorization = `Bearer ${clerkToken}`;
+  return config;
+});
+
 // Attach JWT from secure storage
 api.interceptors.request.use(async (config) => {
   const token = await SecureStore.getItemAsync("access_token");
@@ -316,6 +334,27 @@ export const fieldAPI = {
     api.get("/fintech/cashout/eligible", { params }),
   cashOutRequest: (data: Record<string, unknown>) =>
     api.post("/fintech/cashout", data),
+};
+
+// ─── Controlled inventory counts ────────────────────
+
+export interface CountableProduct {
+  id: string;
+  name: string;
+  sku: string;
+  unitOfMeasure: string;
+}
+
+export const inventoryCountAPI = {
+  lookupBarcode: (barcode: string) =>
+    v2Api.get<{ product: CountableProduct; barcode: string; captureRule: string }>("/inventory/counts", { params: { barcode } }),
+  submit: (data: {
+    productId: string;
+    clientSubmissionId: string;
+    observedQuantity: number;
+    barcode?: string;
+    capturedAt: string;
+  }) => v2Api.post("/inventory/counts", data),
 };
 
 // ─── Notifications ─────────────────────────────────
