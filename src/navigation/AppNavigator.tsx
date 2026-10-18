@@ -338,6 +338,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Otp" component={OtpScreen} options={{ headerShown: false }} />
             <Stack.Screen name="OtpLogin" component={OtpLoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: "Reset Password" }} />
+            <Stack.Screen name="PhysicalCount" component={PhysicalCountScreen} options={{ title: "Secure Physical Count" }} />
           </>
          ) : effRole === "SUPPLIER" ? (
           <>

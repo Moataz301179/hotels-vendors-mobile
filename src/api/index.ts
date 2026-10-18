@@ -5,6 +5,7 @@
 
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
+import { getClerkV2Token } from "@/auth/clerk-v2-token";
 
 const API_BASE = (process.env.EXPO_PUBLIC_API_URL || "https://www.hotelsvendors.com").replace(/\/$/, "");
 
@@ -24,7 +25,7 @@ const v2Api = axios.create({
 });
 
 v2Api.interceptors.request.use(async (config) => {
-  const clerkToken = await SecureStore.getItemAsync("clerk_v2_session_token");
+  const clerkToken = await getClerkV2Token();
   if (!clerkToken) {
     return Promise.reject(new Error("Sign in with your HotelsVendors work account before recording a count."));
   }

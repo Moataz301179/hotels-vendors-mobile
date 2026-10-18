@@ -8,6 +8,8 @@
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { useAuth } from "@clerk/expo";
+import { useHostedAuth } from "@clerk/expo/hosted-auth";
 import { AlertTriangle, Camera, CheckCircle2, Minus, PackageSearch, Plus, RefreshCw, ScanLine, ShieldCheck } from "lucide-react-native";
 
 import { inventoryCountAPI, type CountableProduct } from "@/api";
@@ -32,6 +34,8 @@ function messageFrom(error: unknown) {
 }
 
 export default function PhysicalCountScreen() {
+  const { isLoaded: isClerkLoaded, isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
+  const { startHostedAuth } = useHostedAuth();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanning, setScanning] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -83,6 +87,38 @@ export default function PhysicalCountScreen() {
       setLoading(false);
     }
   };
+
+  const signInForCount = async () => {
+    try {
+      await startHostedAuth({ mode: "sign-in" });
+    } catch {
+      Alert.alert("Sign-in did not finish", "Complete sign-in with your HotelsVendors work account, then try again.");
+    }
+  };
+
+  if (!isClerkLoaded) {
+    return (
+      <View style={styles.centeredState}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.noticeText}>Checking your secure work session…</Text>
+      </View>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.noticeCard}>
+          <ShieldCheck size={40} color={colors.primary} />
+          <Text style={styles.noticeTitle}>Secure work sign-in required</Text>
+          <Text style={styles.noticeText}>Physical counts are available only to authorized HotelsVendors staff. The camera will remain off until sign-in is complete.</Text>
+          <TouchableOpacity style={styles.primaryButton} onPress={signInForCount}>
+            <Text style={styles.primaryButtonText}>Sign in securely</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  }
 
   if (!permission?.granted) {
     return (
@@ -177,6 +213,7 @@ export default function PhysicalCountScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.lg, backgroundColor: colors.bg, flexGrow: 1 },
+  centeredState: { flex: 1, backgroundColor: colors.bg, justifyContent: "center", alignItems: "center", gap: spacing.md, padding: spacing.lg },
   cameraContainer: { flex: 1, backgroundColor: "#000" },
   cameraOverlay: { ...StyleSheet.absoluteFill, justifyContent: "center", alignItems: "center", gap: spacing.md, padding: spacing.xl },
   scanFrame: { width: 248, height: 248, borderRadius: radii.xl, borderWidth: 2, borderColor: colors.primary, backgroundColor: "rgba(255,255,255,0.04)" },

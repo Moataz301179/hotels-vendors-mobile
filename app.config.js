@@ -66,6 +66,8 @@ module.exports = ({ config }) => ({
     },
     plugins: [
       "expo-font",
+      "expo-secure-store",
+      "@clerk/expo",
       ["expo-camera", {
         cameraPermission: "HOVIN uses the camera to scan product barcodes for controlled receiving and physical counts.",
         recordAudioAndroid: false,
