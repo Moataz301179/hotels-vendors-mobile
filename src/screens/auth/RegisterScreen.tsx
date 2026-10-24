@@ -11,7 +11,6 @@ import { useAuthStore } from "@/store/auth";
 import type { UserRole } from "@/types";
 import { isValidEgyptianPhone, normalizePhone } from "@/utils/phone";
 import PhoneInput from "@/components/PhoneInput";
-import { Zap } from "lucide-react-native";
 
 const ROLES: { value: UserRole; label: string; desc: string }[] = [
   { value: "HOTEL", label: "Hotel Buyer", desc: "Browse & order supplies" },
@@ -24,6 +23,7 @@ export default function RegisterScreen({ navigation }: any) {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("HOTEL");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const { isLoading } = useAuthStore();
 
   const handleSendCode = () => {
@@ -39,6 +39,10 @@ export default function RegisterScreen({ navigation }: any) {
       Alert.alert("Invalid Number", "Enter a valid Egyptian mobile number, e.g. 0101 234 5678");
       return;
     }
+    if (!termsAccepted) {
+      Alert.alert("Terms required", "Review and accept the platform terms before creating an account.");
+      return;
+    }
     navigation.navigate("Otp", {
       mode: "register",
       phone: normalizePhone(phone),
@@ -46,7 +50,7 @@ export default function RegisterScreen({ navigation }: any) {
       email: email.trim() || undefined,
       password,
       role,
-      creditInterest: true, // Oliv credit onboarding is a compulsory step (no choice yet — only offering)
+      termsAccepted,
     });
   };
 
@@ -84,18 +88,12 @@ export default function RegisterScreen({ navigation }: any) {
           <Text style={styles.label}>Password</Text>
           <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholderTextColor={colors.textMuted} placeholder="Min 8 characters" secureTextEntry />
 
-          {/* Oliv credit onboarding — COMPULSORY step (no choice): it's the only
-              offering until the real catalog goes live, so every new user is
-              onboarded for financing as part of signup (feeds CHV000 revenue). */}
-          <View style={styles.creditCard}>
-            <View style={styles.creditTextWrap}>
-              <Text style={styles.creditTitle}>⚡ Included: Instant Credit Onboarding</Text>
-              <Text style={styles.creditDesc}>Your account includes pre-qualification for up to EGP 10M working capital via Oliv Finance — 48h payout, no collateral. You'll finish this secure step right after verification.</Text>
+          <TouchableOpacity style={styles.termsRow} onPress={() => setTermsAccepted((accepted) => !accepted)}>
+            <View style={[styles.checkbox, termsAccepted && styles.checkboxOn]}>
+              {termsAccepted && <Text style={styles.checkmark}>✓</Text>}
             </View>
-            <View style={[styles.checkbox, styles.checkboxOn]}>
-              <Text style={styles.checkmark}>✓</Text>
-            </View>
-          </View>
+            <Text style={styles.termsText}>I agree to the HotelsVendors Terms of Service and Privacy Policy.</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.button} onPress={handleSendCode} disabled={isLoading}>
             {isLoading ? <ActivityIndicator color={colors.bg} /> : <Text style={styles.buttonText}>Verify Mobile & Continue</Text>}
@@ -133,19 +131,17 @@ const styles = StyleSheet.create({
   button: { backgroundColor: colors.primary, borderRadius: radii.md, padding: spacing.lg, alignItems: "center", marginTop: spacing.md },
   buttonText: { color: colors.bg, fontWeight: "600", fontSize: 16 },
   link: { color: colors.primary, textAlign: "center", marginTop: spacing.lg, ...typography.bodySmall },
-  creditCard: {
+  termsRow: {
     flexDirection: "row", alignItems: "center", gap: spacing.md,
     backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.primary,
     borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.md,
   },
-  creditTextWrap: { flex: 1, gap: 4 },
-  creditTitle: { ...typography.bodySmall, color: colors.gold, fontWeight: "700" },
-  creditDesc: { ...typography.caption, color: colors.textSecondary, lineHeight: 16 },
+  termsText: { flex: 1, ...typography.bodySmall, color: colors.textSecondary, lineHeight: 18 },
   checkbox: {
     width: 26, height: 26, borderRadius: 8, borderWidth: 1.5,
     borderColor: colors.borderLight, backgroundColor: colors.bgInput,
     alignItems: "center", justifyContent: "center",
   },
-  checkboxOn: { borderColor: colors.gold, backgroundColor: colors.gold },
+  checkboxOn: { borderColor: colors.primary, backgroundColor: colors.primary },
   checkmark: { color: colors.bg, fontWeight: "800", fontSize: 15 },
 });

@@ -5,6 +5,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { ClerkProvider } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
 import { useFonts } from "expo-font";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { enableScreens } from "react-native-screens";
@@ -23,12 +25,29 @@ import SplashScreen from "@/screens/onboarding/SplashScreen";
 import OnboardingScreen from "@/screens/onboarding/OnboardingScreen";
 import { hasOnboarded, markOnboardingSeen } from "@/utils/onboarding";
 import AppNavigator from "@/navigation/AppNavigator";
+import { ClerkSessionBridge } from "@/auth/ClerkSessionBridge";
 
 enableScreens();
 
 type Phase = "splash" | "onboarding" | "app";
 
+const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
 export default function App() {
+  if (!clerkPublishableKey) {
+    throw new Error("EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is required for the secure HotelsVendors mobile session.");
+  }
+
+  return (
+    <ClerkProvider publishableKey={clerkPublishableKey} tokenCache={tokenCache}>
+      <ClerkSessionBridge>
+        <AppContent />
+      </ClerkSessionBridge>
+    </ClerkProvider>
+  );
+}
+
+function AppContent() {
   const { restoreSession } = useAuthStore();
   const { loadFromStorage } = useNotificationStore();
   const hydrateSettings = useSettingsStore((s) => s.hydrate);

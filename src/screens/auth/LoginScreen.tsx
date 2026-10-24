@@ -84,6 +84,10 @@ export default function LoginScreen({ navigation }: any) {
             <TouchableOpacity onPress={() => navigation.navigate("OtpLogin")}>
               <Text style={styles.linkMuted}>Sign in with mobile & OTP</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => navigation.navigate("PhysicalCount")}>
+              <Text style={styles.linkMuted}>Record a secure physical count</Text>
+            </TouchableOpacity>
           </Panel>
         </View>
 
