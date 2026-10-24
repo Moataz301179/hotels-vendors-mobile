@@ -2,6 +2,7 @@
   "expo": {
     "name": "HOVIN",
     "slug": "hovin",
+    "scheme": "hovin",
     "version": "1.0.0",
     "backgroundColor": "#0B0F14",
     "icon": "./assets/icon.png",
@@ -28,6 +29,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ec9544d2-fb7d-4806-95b3-dae26d8893e9"
+      }
     }
   }
 }
