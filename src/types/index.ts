@@ -103,6 +103,7 @@ export type OrderStatus =
   | "REJECTED"
   | "CONFIRMED"
   | "IN_TRANSIT"
+  | "PARTIALLY_DELIVERED"
   | "DELIVERED"
   | "CANCELLED";
 
