@@ -134,7 +134,9 @@ export default function ControlledReceiptScreen({ route }: any) {
     }
     const hasVariance = lines.some((line) => {
       const item = order.items.find((candidate) => candidate.id === line.orderItemId);
-      return item ? line.receivedQuantity < item.remainingQuantity || line.acceptedQuantity < line.receivedQuantity : false;
+      return item && line.reviewed
+        ? line.receivedQuantity < item.remainingQuantity || line.acceptedQuantity < line.receivedQuantity
+        : false;
     });
     if (hasVariance && evidenceUris.length === 0) {
       Alert.alert("Add photo evidence", "Attach at least one photo when items are missing, damaged, or rejected.");
@@ -223,11 +225,15 @@ export default function ControlledReceiptScreen({ route }: any) {
 
   const validationError = validateReceiptDraft(order, lines);
   const totalReceived = lines.reduce((sum, line) => sum + (Number(line.receivedQuantity) || 0), 0);
+  const uncheckedLines = order.items.filter((item) =>
+    !lines.find((line) => line.orderItemId === item.id)?.reviewed
+  ).length;
   const totalMissing = order.items.reduce((sum, item) => {
     const line = lines.find((candidate) => candidate.orderItemId === item.id);
-    return sum + (line ? summarizeReceiptLine(item, line).missingQuantity : item.remainingQuantity);
+    return sum + (line ? summarizeReceiptLine(item, line).missingQuantity ?? 0 : 0);
   }, 0);
-  const totalDamaged = lines.reduce((sum, line) => sum + Math.max(0, line.receivedQuantity - line.acceptedQuantity), 0);
+  const totalDamaged = lines.reduce((sum, line) =>
+    sum + (line.reviewed ? Math.max(0, line.receivedQuantity - line.acceptedQuantity) : 0), 0);
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -248,7 +254,7 @@ export default function ControlledReceiptScreen({ route }: any) {
 
       <View style={styles.summaryRow}>
         <Summary label="Received" value={totalReceived} />
-        <Summary label="Missing" value={totalMissing} />
+        <Summary label="Missing" value={uncheckedLines === 0 ? totalMissing : "—"} />
         <Summary label="Damaged / rejected" value={totalDamaged} />
       </View>
 
@@ -269,8 +275,22 @@ export default function ControlledReceiptScreen({ route }: any) {
               label="Received in this delivery"
               value={line.receivedQuantity}
               max={item.remainingQuantity}
-              onChange={(value) => updateLine(item.id, { receivedQuantity: value, acceptedQuantity: Math.min(line.acceptedQuantity, value) })}
+              onChange={(value) => updateLine(item.id, {
+                receivedQuantity: value,
+                acceptedQuantity: line.acceptedQuantity === line.receivedQuantity ? value : Math.min(line.acceptedQuantity, value),
+                reviewed: true,
+              })}
             />
+            {!line.reviewed ? (
+              <TouchableOpacity
+                style={styles.zeroConfirm}
+                onPress={() => updateLine(item.id, { receivedQuantity: 0, acceptedQuantity: 0, reviewed: true })}
+                accessibilityRole="button"
+                accessibilityLabel={`Confirm zero received for ${item.product.name}`}
+              >
+                <Text style={styles.zeroConfirmText}>Confirm zero received for this item</Text>
+              </TouchableOpacity>
+            ) : null}
             <QuantityInput
               label="Accepted as usable"
               value={line.acceptedQuantity}
@@ -278,8 +298,8 @@ export default function ControlledReceiptScreen({ route }: any) {
               onChange={(value) => updateLine(item.id, { acceptedQuantity: value })}
             />
             <View style={styles.varianceRow}>
-              <Text style={styles.variance}>Missing: {variance.missingQuantity} {item.product.unitOfMeasure}</Text>
-              <Text style={styles.variance}>Damaged/rejected: {variance.damagedOrRejectedQuantity} {item.product.unitOfMeasure}</Text>
+              <Text style={styles.variance}>Missing: {line.reviewed ? variance.missingQuantity : "not checked"} {item.product.unitOfMeasure}</Text>
+              <Text style={styles.variance}>Damaged/rejected: {line.reviewed ? variance.damagedOrRejectedQuantity : "not checked"} {item.product.unitOfMeasure}</Text>
             </View>
             {variance.damagedOrRejectedQuantity > 0 ? (
               <TextInput
@@ -373,7 +393,7 @@ function InfoState({ title, message, loading = false }: { title: string; message
   );
 }
 
-function Summary({ label, value }: { label: string; value: number }) {
+function Summary({ label, value }: { label: string; value: number | string }) {
   return (
     <View style={styles.summaryCard}>
       <Text style={styles.summaryValue}>{value}</Text>
