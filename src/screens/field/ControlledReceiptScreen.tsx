@@ -19,7 +19,11 @@ import type { LocalReceiptDraft, ReceiptLineDraft, ReceiptOrder } from "@/receiv
 const MAX_EVIDENCE_PHOTOS = 8;
 
 function messageFrom(error: unknown) {
-  const response = (error as { response?: { data?: { error?: string } } })?.response;
+  const response = (error as { response?: { status?: number; data?: { error?: string } } })?.response;
+  if (response?.status === 401) return "Sign in with your HotelsVendors work account, then try again.";
+  if (response?.status === 403) return "Your account is not authorized to receive this purchase order.";
+  if (response?.status === 404) return "This purchase order is not available in your hotel workspace.";
+  if (response?.status === 409) return "This purchase order is no longer in a receivable state. Refresh the order list.";
   return response?.data?.error || (error instanceof Error ? error.message : "The receipt could not be loaded.");
 }
 
