@@ -69,7 +69,7 @@ test("rejects over-receipt, fractional quantities, missing damage reason, and du
   ]), /exactly once/i);
 });
 
-test("scopes encrypted local draft keys to both signed-in user and PO", () => {
+test("scopes local draft keys to both signed-in user and PO", () => {
   const first = receiptDraftStorageKey("user-a", "order-1");
   assert.notEqual(first, receiptDraftStorageKey("user-b", "order-1"));
   assert.notEqual(first, receiptDraftStorageKey("user-a", "order-2"));
