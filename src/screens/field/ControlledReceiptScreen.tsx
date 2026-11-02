@@ -396,7 +396,7 @@ function QuantityInput({ label, value, max, onChange }: { label: string; value: 
           value={String(value)}
           onChangeText={(raw) => {
             if (raw === "") { onChange(0); return; }
-            if (/^\\d+$/.test(raw)) onChange(Math.min(max, Number(raw)));
+            if (/^\d+$/.test(raw)) onChange(Math.min(max, Number(raw)));
           }}
           keyboardType="number-pad"
           accessibilityLabel={label}
