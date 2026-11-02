@@ -41,7 +41,7 @@ const MODULES: HubModule[] = [
   },
   {
     key: "dock", title: "Dock Scanner",
-    subtitle: "Scan barcode → GRN + credit note", icon: ScanLine,
+    subtitle: "Identify delivery codes · verify each item before receipt", icon: ScanLine,
     route: "FieldDockScanner", accent: colors.primary,
   },
   {
