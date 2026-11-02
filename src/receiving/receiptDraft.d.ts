@@ -26,6 +26,7 @@ export interface ReceiptLineDraft {
   orderItemId: string;
   receivedQuantity: number;
   acceptedQuantity: number;
+  reviewed: boolean;
   rejectionReason: string;
   conditionNotes: string;
 }
@@ -45,7 +46,7 @@ export function createReceiptDraftLines(order: ReceiptOrder): ReceiptLineDraft[]
 export function summarizeReceiptLine(
   item: ReceiptOrderItem,
   line: ReceiptLineDraft
-): { missingQuantity: number; damagedOrRejectedQuantity: number };
+): { missingQuantity: number | null; damagedOrRejectedQuantity: number | null };
 export function validateReceiptDraft(order: ReceiptOrder, lines: ReceiptLineDraft[]): string | null;
 export function createReceiptDraftId(cryptoApi?: Crypto): string;
 export function receiptDraftStorageKey(userId: string, orderId: string): string;
