@@ -314,6 +314,11 @@ export const fieldAPI = {
   liveOrders: (params?: Record<string, string>) =>
     api.get("/field/orders/live", { params }),
 
+  // Clerk-authenticated, tenant-scoped receiving context; returns no price,
+  // supplier, invoice, or financing fields. Submission stays server-gated.
+  receiptContext: (orderId: string) =>
+    v2Api.get(`/mobile/receipts/${encodeURIComponent(orderId)}`),
+
   // One-tap status shift on a live PO (READY / IN_TRANSIT / DELIVERED)
   shiftStatus: (orderId: string, status: string) =>
     api.post(`/field/orders/${orderId}/status`, { status }),
