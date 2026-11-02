@@ -16,6 +16,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   REJECTED: colors.error,
   CONFIRMED: colors.info,
   IN_TRANSIT: colors.disbursed,
+  PARTIALLY_DELIVERED: colors.warning,
   DELIVERED: colors.approved,
   CANCELLED: colors.textMuted,
 };
@@ -33,25 +34,43 @@ export default function OrdersScreen({ navigation }: any) {
 
   useEffect(() => { fetchOrders(); }, []);
 
-  const renderItem = ({ item }: { item: Order }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => navigation.navigate("OrderDetail", { id: item.id })}
-      activeOpacity={0.7}
-    >
-      <View style={styles.cardHeader}>
-        <Text style={styles.orderNum}>{item.orderNumber}</Text>
-        <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[item.status] + "20" }]}>
-          <Text style={[styles.statusText, { color: STATUS_COLORS[item.status] }]}>{item.status}</Text>
-        </View>
+  const renderItem = ({ item }: { item: Order }) => {
+    const canStartReceiving = item.status === "IN_TRANSIT" || item.status === "PARTIALLY_DELIVERED";
+    return (
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.orderSummary}
+          onPress={() => navigation.navigate("OrderDetail", { id: item.id })}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`Open purchase order ${item.orderNumber}`}
+        >
+          <View style={styles.cardHeader}>
+            <Text style={styles.orderNum}>{item.orderNumber}</Text>
+            <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[item.status] + "20" }]}>
+              <Text style={[styles.statusText, { color: STATUS_COLORS[item.status] }]}>{item.status}</Text>
+            </View>
+          </View>
+          <Text style={styles.supplier}>{item.supplierName || "—"}</Text>
+          <View style={styles.cardFooter}>
+            <Text style={styles.amount}>EGP {item.totalAmount.toLocaleString()}</Text>
+            <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+          </View>
+        </TouchableOpacity>
+        {canStartReceiving ? (
+          <TouchableOpacity
+            style={styles.receiveButton}
+            onPress={() => navigation.navigate("ControlledReceipt", { orderId: item.id })}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={`Start receiving purchase order ${item.orderNumber}`}
+          >
+            <Text style={styles.receiveButtonText}>Receive delivery</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
-      <Text style={styles.supplier}>{item.supplierName || "—"}</Text>
-      <View style={styles.cardFooter}>
-        <Text style={styles.amount}>EGP {item.totalAmount.toLocaleString()}</Text>
-        <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <FlatList
@@ -67,7 +86,10 @@ export default function OrdersScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   list: { padding: spacing.lg, gap: spacing.md },
-  card: { backgroundColor: colors.bgCard, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  card: { backgroundColor: colors.bgCard, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, gap: spacing.md },
+  orderSummary: { gap: spacing.xs },
+  receiveButton: { minHeight: 42, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primary + "20", borderWidth: 1, borderColor: colors.primary + "66" },
+  receiveButtonText: { ...typography.bodySmall, color: colors.primary, fontWeight: "700" },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   orderNum: { ...typography.h3, color: colors.text },
   statusBadge: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: radii.full },
