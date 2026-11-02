@@ -48,7 +48,10 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "test:receiving": "node --test tests/receiving/receiptDraft.test.cjs",
+    "test": "npm run test:receiving"
   },
   "private": true,
   "optionalDependencies": {
