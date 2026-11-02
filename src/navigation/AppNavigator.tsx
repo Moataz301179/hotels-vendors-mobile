@@ -40,6 +40,7 @@ import HotelFinancingScreen from "@/screens/hotel/HotelFinancingScreen";
 import ScheduledOrdersScreen from "@/screens/hotel/ScheduledOrdersScreen";
 import InventoryBalanceScreen from "@/screens/hotel/InventoryBalanceScreen";
 import PhysicalCountScreen from "@/screens/hotel/PhysicalCountScreen";
+import ControlledReceiptScreen from "@/screens/field/ControlledReceiptScreen";
 
 // Supplier screens
 import SupplierDashboardScreen from "@/screens/supplier/SupplierDashboardScreen";
@@ -369,6 +370,7 @@ export default function AppNavigator() {
              <Stack.Screen name="ScheduledOrders" component={ScheduledOrdersScreen} options={{ title: "Scheduled Orders" }} />
              <Stack.Screen name="InventoryBalance" component={InventoryBalanceScreen} options={{ title: "Inventory Balance" }} />
              <Stack.Screen name="PhysicalCount" component={PhysicalCountScreen} options={{ title: "Physical Count" }} />
+             <Stack.Screen name="ControlledReceipt" component={ControlledReceiptScreen} options={{ title: "Receive delivery" }} />
                            <Stack.Screen name="CategoryGridDemo" component={CategoryGridDemoScreen} options={{ title: "Categories" }} />
                          </>
         )}
