@@ -4,6 +4,7 @@ function createReceiptDraftLines(order) {
     orderItemId: item.id,
     receivedQuantity: 0,
     acceptedQuantity: 0,
+    reviewed: false,
     rejectionReason: "",
     conditionNotes: "",
   }));
@@ -13,8 +14,8 @@ function summarizeReceiptLine(item, line) {
   const receivedQuantity = Number(line?.receivedQuantity ?? 0);
   const acceptedQuantity = Number(line?.acceptedQuantity ?? 0);
   return {
-    missingQuantity: Math.max(0, item.remainingQuantity - receivedQuantity),
-    damagedOrRejectedQuantity: Math.max(0, receivedQuantity - acceptedQuantity),
+    missingQuantity: line?.reviewed ? Math.max(0, item.remainingQuantity - receivedQuantity) : null,
+    damagedOrRejectedQuantity: line?.reviewed ? Math.max(0, receivedQuantity - acceptedQuantity) : null,
   };
 }
 
@@ -38,6 +39,7 @@ function validateReceiptDraft(order, lines) {
     seen.add(line.orderItemId);
     const item = itemById.get(line.orderItemId);
     if (!item) return "A receipt line does not belong to this purchase order.";
+    if (line.reviewed !== true) return "Review every purchase order line, including lines with zero received.";
 
     const received = Number(line.receivedQuantity);
     const accepted = Number(line.acceptedQuantity);
